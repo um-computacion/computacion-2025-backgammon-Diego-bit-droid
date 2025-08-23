@@ -22,3 +22,4 @@ class BackgammonGame:
     
     def cambiar_turno(self):
         #cambia turno 0 igual a un jugador 1 igual a otro se ve cuando cree la clase jugador
+        
