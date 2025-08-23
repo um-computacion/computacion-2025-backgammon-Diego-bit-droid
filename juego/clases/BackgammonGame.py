@@ -15,7 +15,7 @@ class BackgammonGame:
     def lanzar_dados(self):
         # valor se obtiene de otro metodo que existira en la clase dice
     
-    def mover_ficha(self, desde, hasta):
+    def mover_ficha(self):
         # idea para reglas futuro:hacer if si la ficha sale del tablero    
     def hay_ganador(self):
         # Regla en la cual se define el ganador todavia falta Aclaracion:ver video 
