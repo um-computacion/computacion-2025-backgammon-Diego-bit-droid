@@ -12,6 +12,5 @@ class Dice:
     
     def get_valores_dados(self):
       
-    def calcular_movimientos_totales(self):
-        #calcular cantidad de movientos y si es doble la tirada o no de vuelve en int (este metodo estoy en duda si dejarlo en esta clase o llevarlo a la clase backgammon)
+    
         
