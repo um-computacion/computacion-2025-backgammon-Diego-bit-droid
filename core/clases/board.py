@@ -40,8 +40,8 @@ class Board:
         for i in range(12, 24):
             if len(self.__posiciones__[i]) > max_height_top:
                 max_height_top = len(self.__posiciones__[i])
-        
-        for height in range(max_height_top - 1, -1, -1):
+
+        for height in range(max_height_top):
             line = ""
             for i in range(12, 24):
                 if height < len(self.__posiciones__[i]):
@@ -49,7 +49,7 @@ class Board:
                 else:
                     line += "   "
             print(line)
-        
+                
         print("-" * 50)
         print()
         
@@ -60,15 +60,15 @@ class Board:
                 max_height_bottom = len(self.__posiciones__[i])
         
         
-        for height in range(max_height_bottom):
-            line = ""
-            for i in range(11, -1, -1):
+        for height in range(max_height_bottom - 1, -1, -1): 
+            line = []
+            for i in range(11, -1, -1):  
                 if height < len(self.__posiciones__[i]):
-                    line += f" {self.__posiciones__[i][height]} "
+                    line.append(f" {self.__posiciones__[i][height]} ")
                 else:
-                    line += "   "
-            print(line)
-        
+                    line.append("   ")
+            print("".join(line))  
+
 
         header_bottom = ""
         for i in range(11, -1, -1):
@@ -82,8 +82,6 @@ class Board:
         print("="*60)
         #implementar a la hora de mostrar el tablero que se muestre el estado de cada jugador
 
-        
-
     def mover_ficha(self, desde, hasta, jugador):
         # mover ficha desde cualquier lugar hacia cualquier lugar:
         # del bar  al tablero 
@@ -93,4 +91,7 @@ class Board:
         # retorna True si movimiento exitoso, False si inválido
         # incluye actualizacion en ficha  comidas cuando come una
         
+        pass
+    def calcular_movimientos_totales(self):
+        #calcular cantidad de movientos y si es doble la tirada o no de vuelve en int
         pass

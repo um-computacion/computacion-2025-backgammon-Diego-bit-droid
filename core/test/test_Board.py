@@ -7,7 +7,7 @@ class TestBoard(unittest.TestCase):
         board = Board()
         board.preparar_tablero()
         
-        #posiciones jugador 1
+        #posicion jugador 1
         self.assertEqual(board.__posiciones__[0], ['X', 'X'])
         self.assertEqual(board.__posiciones__[11], ['X', 'X', 'X', 'X', 'X'])
         self.assertEqual(board.__posiciones__[16], ['X', 'X', 'X'])
