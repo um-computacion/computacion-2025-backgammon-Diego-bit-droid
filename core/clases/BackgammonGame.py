@@ -1,4 +1,4 @@
-from juego.clases.board import Board  
+from core.clases.board import Board  
 
 class BackgammonGame:
     def __init__(self):
