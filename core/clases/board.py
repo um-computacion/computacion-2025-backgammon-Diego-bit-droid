@@ -92,6 +92,9 @@ class Board:
         # incluye actualizacion en ficha  comidas cuando come una
         
         pass
-    def calcular_movimientos_totales(self):
-        #calcular cantidad de movientos y si es doble la tirada o no de vuelve en int
-        pass
+    def calcular_movimientos_totales(self,dado1,dado2):
+         if dado1 == dado2:  
+            return [dado1] * 4
+         else:
+            return [dado1, dado2]
+        

@@ -29,6 +29,18 @@ class TestBoard(unittest.TestCase):
             board.mostrar_board()
         except Exception as e:
             self.fail(f"mostrar_board() falló: {e}")
+    def test_movimientos_dados_distintos(self):
+        board = Board()
+        movimientos = board.calcular_movimientos_totales(3, 5)
+        self.assertEqual(movimientos, [3, 5])
+        self.assertEqual(len(movimientos), 2)
+
+    def test_movimientos_doble(self):
+        board = Board()
+        movimientos = board.calcular_movimientos_totales(4, 4)
+        self.assertEqual(movimientos, [4, 4, 4, 4])
+        self.assertEqual(len(movimientos), 4)
+
     
     
 if __name__ == "__main__":
