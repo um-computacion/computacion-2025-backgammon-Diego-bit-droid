@@ -82,7 +82,7 @@ class Board:
         print("="*60)
         #implementar a la hora de mostrar el tablero que se muestre el estado de cada jugador
 
-    def mover_ficha(self, desde, hasta, jugador):
+   # def mover_ficha(self, desde, hasta, jugador):
         # mover ficha desde cualquier lugar hacia cualquier lugar:
         # del bar  al tablero 
         # de una posición del tablero (desde = 0-23) a otra (hasta = 0-23)
