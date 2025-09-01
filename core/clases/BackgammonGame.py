@@ -18,27 +18,32 @@ class BackgammonGame:
             if jugador1 > jugador2:
                 self.__turno__ = 1
                 print("Jugador 1 empieza")
-                return True
+                return 1
             elif jugador2 > jugador1:
                 self.__turno__ = 2
                 print("Jugador 2 empieza")
-                return True
+                return 2
             else:
                 print("Empate, se vuelve a lanzar")
 
             
 
-    def get_tablero(self):
+    #def get_tablero(self):
         # obtiene el tablero de la clase tablero
-    
-    def lanzar_dados(self):
-        # valor se obtiene de otro metodo que existira en la clase dice
-    
-    def mover_ficha(self):
+        pass
+
+    #def mover_ficha(self):
+        pass
         # idea para reglas futuro:hacer if si la ficha sale del tablero    
-    def hay_ganador(self):
-        # Regla en la cual se define el ganador todavia falta Aclaracion:ver video 
+    #def hay_ganador(self):
+        pass
+
+   # def hay_ganador(self):
+        pass
+        # Regla en la cual se define el ganador todavia falta Aclaracion:ver video
+
     
-    def cambiar_turno(self):
+    #def cambiar_turno(self):
+        pass
         #cambia turno 0 igual a un jugador 1 igual a otro se ve cuando cree la clase jugador
         
