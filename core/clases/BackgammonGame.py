@@ -1,4 +1,5 @@
 from core.clases.board import Board  
+from core.clases.Dice import Dice
 
 class BackgammonGame:
     def __init__(self):
@@ -7,7 +8,25 @@ class BackgammonGame:
         self.__board__ = Board()
    
     def quien_empieza(self):
-        # el que saque el numero mas alto empieza de ambos jugadores 
+        while True:
+            jugador1 = self.lanzar_dado()
+            jugador2 = self.lanzar_dado()
+
+            print(f"Jugador 1 sacó: {jugador1}")
+            print(f"Jugador 2 sacó: {jugador2}")
+
+            if jugador1 > jugador2:
+                self.__turno__ = 1
+                print("Jugador 1 empieza")
+                return True
+            elif jugador2 > jugador1:
+                self.__turno__ = 2
+                print("Jugador 2 empieza")
+                return True
+            else:
+                print("Empate, se vuelve a lanzar")
+
+            
 
     def get_tablero(self):
         # obtiene el tablero de la clase tablero
