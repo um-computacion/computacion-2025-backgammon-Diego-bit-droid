@@ -26,15 +26,14 @@ class BackgammonGame:
             else:
                 print("Empate, se vuelve a lanzar")
 
-            
+    def get_tablero(self):
+        return self.__board__.get_tablero()
 
-    #def get_tablero(self):
-        # obtiene el tablero de la clase tablero
-        pass
 
     #def mover_ficha(self):
+        # idea para reglas futuro:hacer if si la ficha sale del tablero
         pass
-        # idea para reglas futuro:hacer if si la ficha sale del tablero    
+
     #def hay_ganador(self):
         pass
 

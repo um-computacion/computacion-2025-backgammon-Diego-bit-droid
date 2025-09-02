@@ -2,7 +2,6 @@ import unittest
 from core.clases.board import Board
 
 class TestBoard(unittest.TestCase):
-    
     def test_preparar_tablero(self):
         board = Board()
         board.preparar_tablero()

@@ -7,6 +7,14 @@ class Board:
         # fichas fuera del juego
         self.__fuera__ = {'player1': 0, 'player2': 0}
 
+    def get_tablero(self):
+        return {
+            "posiciones": [list(pos) for pos in self.__posiciones__],
+            "bar": dict(self.__bar__),
+            "fuera": dict(self.__fuera__)
+        }
+
+    
     def preparar_tablero(self):
         #fichas jugador1
         self.__posiciones__[0] = ['X'] * 2   # 2 fichas en posición 0
