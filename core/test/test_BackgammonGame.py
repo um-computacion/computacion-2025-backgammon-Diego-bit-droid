@@ -2,6 +2,19 @@ import unittest
 from core.clases.BackgammonGame import BackgammonGame
 
 class TestBackgammonGame(unittest.TestCase):
+    def test_get_tablero(self):
+        game = BackgammonGame()
+        game.get_tablero()
+
+        try:
+            estado = game.get_tablero()
+        except Exception as e:
+            self.fail(f"get_tablero() falló: {e}")
+
+        self.assertIn("posiciones", estado)
+        self.assertIn("bar", estado)
+        self.assertIn("fuera", estado)
+    
 
     def test_quien_empieza_jugador1(self):
         game = BackgammonGame()
