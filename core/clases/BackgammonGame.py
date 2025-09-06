@@ -1,12 +1,18 @@
 from core.clases.board import Board  
 from core.clases.Dice import Dice
+from core.clases.Player import Player
 
 class BackgammonGame:
     def __init__(self):
         self.__turno__ = 0
         self.__movimientos_restantes__ = 0 #usar en lanzar dados y mover ficha
         self.__board__ = Board()
-   
+        self.__jugadores__ = {}
+    def registrar_jugadores(self, jugador1, jugador2):
+        self.__jugadores__[jugador1.get_nombre()] = jugador1
+        self.__jugadores__[jugador2.get_nombre()] = jugador2
+    def get_jugador_por_nombre(self, nombre):
+        return self.__jugadores__.get(nombre)
     def quien_empieza(self):
         while True:
             jugador1 = self.lanzar_dado()
