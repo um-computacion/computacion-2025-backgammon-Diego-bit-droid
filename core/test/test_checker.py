@@ -7,7 +7,8 @@ class TestChecker(unittest.TestCase):
     def test_get_nombre(self):
         jugador1 = Player("Diego", "X")
         jugador2 = Player("Bot", "O")
-        backgammon = BackgammonGame(jugador1, jugador2)
+        backgammon = BackgammonGame()
+        backgammon.registrar_jugadores(jugador1, jugador2)
         ficha = Checker("Diego", backgammon)
 
         try:
@@ -20,7 +21,8 @@ class TestChecker(unittest.TestCase):
     def test_get_ficha(self):
         jugador1 = Player("Diego", "X")
         jugador2 = Player("Bot", "O")
-        backgammon = BackgammonGame(jugador1, jugador2)
+        backgammon = BackgammonGame()
+        backgammon.registrar_jugadores(jugador1, jugador2)
         ficha = Checker("Bot", backgammon)
 
         try:
@@ -28,6 +30,7 @@ class TestChecker(unittest.TestCase):
         except Exception as e:
             self.fail(f"get_ficha() falló: {e}")
 
-        self.assertEqual(simbolo, "O"
+        self.assertEqual(simbolo, "O")
+
 if __name__ == '__main__':
     unittest.main()
