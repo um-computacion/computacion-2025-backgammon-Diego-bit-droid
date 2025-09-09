@@ -52,4 +52,3 @@ class Player:
     
     
 
-#cuando se necesite relacionar con tablero usar getters en backgamongame

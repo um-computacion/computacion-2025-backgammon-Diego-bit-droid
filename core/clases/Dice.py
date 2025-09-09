@@ -1,4 +1,4 @@
-import random #
+import random 
 
 class Dice:
     def __init__(self):
@@ -9,5 +9,3 @@ class Dice:
         self.__dado1__ = random.randint(1, 6)
         self.__dado2__ = random.randint(1, 6)
         return self.__dado1__, self.__dado2__
-
-        

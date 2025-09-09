@@ -46,3 +46,4 @@
 
         if __name__ == '__main__':
             unittest.main()
+#Aclarcion cambio la forma de usar checker despues de la consulta de hoy martes pero dejo este promp para no cambiar mi documentacion
