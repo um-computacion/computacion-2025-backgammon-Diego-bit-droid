@@ -15,25 +15,30 @@ class Player:
     def get_ficha(self):
         return self.__ficha__
 
-    
-    def fichas_en_tablero(self):
-        pass
-        # retorna la cantidad de fichas en el tablero
-    
+    def fichas_en_tablero(self, posiciones):
+        cantidad = sum(pos.count(self.__ficha__) for pos in posiciones)
+        self.__fichas_en_tablero__ = cantidad
+        return cantidad
 
-    def fichas_en_bar(self):
-        pass
-        # retorna la cantidad de fichas en el bar relacionado con fichas comidas
-        
+    def fichas_en_bar(self, fichas_en_bar):
+        cantidad = fichas_en_bar.count(self.__ficha__)
+        self.__fichas_en_bar__ = cantidad
+        return cantidad
 
-    def fichas_sacadas(self):
-        pass
-        # retorna la cantidad de fichas sacadas de la mano con las condicion para ganar
-        
-    def estado_del_player(self):
-        pass
-        # retorna el estado del jugador nombre, símbolo y fichas (en fichas cantidad en el bar cantidad sacadas y cantidad en el tablero)
-# estas clases cambian el estado las fichas     
+    def fichas_sacadas(self, fichas_fuera):
+        cantidad = fichas_fuera.count(self.__ficha__)
+        self.__fichas_sacadas__ = cantidad
+        return cantidad
+
+    def estado_jugador(self):
+        return {
+            "nombre": self.__nombre__,
+            "ficha": self.__ficha__,
+            "en_tablero": self.__fichas_en_tablero__,
+            "en_bar": self.__fichas_en_bar__,
+            "sacadas": self.__fichas_sacadas__,
+            "total": self.__fichas_en_tablero__ + self.__fichas_en_bar__ + self.__fichas_sacadas__
+        }    
     def ficha_va_al_bar(self):
 
         pass
