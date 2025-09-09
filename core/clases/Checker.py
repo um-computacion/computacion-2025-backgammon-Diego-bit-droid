@@ -1,14 +1,9 @@
-from core.clases.BackgammonGame import BackgammonGame
 class Checker:
-    def __init__(self, nombre_jugador, backgammon):
-        self.__nombre_jugador__ = nombre_jugador
-        self.__backgammon__ = backgammon
+    def __init__(self, simbolo):
+        self.simbolo = simbolo  # "X" o "O"
 
-    def get_nombre(self):
-        return self.__nombre_jugador__
+    def __str__(self):
+        return self.simbolo # Imprime el símbolo de la ficha
 
-    def get_ficha(self):
-        jugador = self.__backgammon__.get_jugador_por_nombre(self.__nombre_jugador__)
-        if jugador is None:
-            raise ValueError(f"jugador '{self.__nombre_jugador__}' no está registrado en el juego")
-        return jugador.get_ficha()
+    def __repr__(self):
+        return self.simbolo  # Imprime el símbolo de la ficha en listas

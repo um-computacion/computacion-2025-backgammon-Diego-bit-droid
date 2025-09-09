@@ -1,36 +1,25 @@
 import unittest
-from core.clases.Player import Player
-from core.clases.BackgammonGame import BackgammonGame
 from core.clases.Checker import Checker
 
 class TestChecker(unittest.TestCase):
-    def test_get_nombre(self):
-        jugador1 = Player("Diego", "X")
-        jugador2 = Player("Bot", "O")
-        backgammon = BackgammonGame()
-        backgammon.registrar_jugadores(jugador1, jugador2)
-        ficha = Checker("Diego", backgammon)
 
-        try:
-            nombre = ficha.get_nombre()
-        except Exception as e:
-            self.fail(f"get_nombre() falló: {e}")
+    def test_simbolo(self):  # Verificamos que el atributo simbolo se guarda correctamente
+        ficha_x = Checker("X")
+        ficha_o = Checker("O")
+        self.assertEqual(ficha_x.simbolo, "X")
+        self.assertEqual(ficha_o.simbolo, "O")
 
-        self.assertEqual(nombre, "Diego")
+    def test_str(self): # Verificamos que str() devuelve el símbolo correcto
+        ficha_x = Checker("X")
+        ficha_o = Checker("O")
+        self.assertEqual(str(ficha_x), "X")
+        self.assertEqual(str(ficha_o), "O")
 
-    def test_get_ficha(self):
-        jugador1 = Player("Diego", "X")
-        jugador2 = Player("Bot", "O")
-        backgammon = BackgammonGame()
-        backgammon.registrar_jugadores(jugador1, jugador2)
-        ficha = Checker("Bot", backgammon)
+    def test_repr(self):  # Verificamos que repr() devuelve el símbolo correcto
+        ficha_x = Checker("X")
+        ficha_o = Checker("O")
+        self.assertEqual(repr(ficha_x), "X")
+        self.assertEqual(repr(ficha_o), "O")
 
-        try:
-            simbolo = ficha.get_ficha()
-        except Exception as e:
-            self.fail(f"get_ficha() falló: {e}")
-
-        self.assertEqual(simbolo, "O")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

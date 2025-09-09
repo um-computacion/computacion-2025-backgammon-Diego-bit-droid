@@ -1,7 +1,9 @@
+from core.clases.Checker import Checker
+
 class Board:
     def __init__(self):
         # 24 posiciones del tablero de backgammon (0-23)
-        self.__posiciones__ = [[] for _ in range(24)]
+        self.__posiciones__ = self.preparar_tablero()
         # bar (fichas comidas)
         self.__bar__ = {'player1': 0, 'player2': 0}
         # fichas fuera del juego
@@ -16,18 +18,19 @@ class Board:
 
     
     def preparar_tablero(self):
-        #fichas jugador1
-        self.__posiciones__[0] = ['X'] * 2   # 2 fichas en posición 0
-        self.__posiciones__[11] = ['X'] * 5  # 5 fichas en posición 11
-        self.__posiciones__[16] = ['X'] * 3  # 3 fichas en posición 16
-        self.__posiciones__[18] = ['X'] * 5  # 5 fichas en posición 18
-        
+        self.__posiciones__ = [[] for _ in range(24)]
+                #fichas jugador1
+        self.__posiciones__[0] = [Checker("X") for i in range(2)] # 2 fichas en posición 0
+        self.__posiciones__[11] = [Checker("X") for i in range(5)]  # 5 fichas en posición 11
+        self.__posiciones__[16] = [Checker("X") for i in range(3)]  # 3 fichas en posición 16
+        self.__posiciones__[18] = [Checker("X") for i in range(5)]  # 5 fichas en posición 18
+
         #fichas jugador2
-        self.__posiciones__[23] = ['O'] * 2  # 2 fichas en posición 23
-        self.__posiciones__[12] = ['O'] * 5  # 5 fichas en posición 12
-        self.__posiciones__[7] = ['O'] * 3   # 3 fichas en posición 7
-        self.__posiciones__[5] = ['O'] * 5   # 5 fichas en posición 5
-    
+        self.__posiciones__[23] = [Checker("O") for i in range(2)]  # 2 fichas en posición 23
+        self.__posiciones__[12] = [Checker("O") for i in range(5)]  # 5 fichas en posición 12
+        self.__posiciones__[7] = [Checker("O") for i in range(3)]   # 3 fichas en posición 7
+        self.__posiciones__[5] = [Checker("O") for i in range(5)]   # 5 fichas en posición 5
+        return self.__posiciones__
     def mostrar_board(self):
         print("="*60)
         
