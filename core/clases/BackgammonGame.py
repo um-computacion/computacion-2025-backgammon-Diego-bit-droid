@@ -8,7 +8,18 @@ class BackgammonGame:
         self.__movimientos_restantes__ = 0 #usar en lanzar dados y mover ficha
         self.__board__ = Board()
         self.__jugadores__ = {}
-    
+   
+    def get_fichas_en_tablero(self, player):
+        posiciones = self.__board__.get_tablero()["posiciones"]
+        return player.fichas_en_tablero(posiciones)
+
+    def get_fichas_en_bar(self, player):
+        bar = self.__board__.get_tablero()["bar"]
+        return player.fichas_en_bar(bar)
+
+    def get_fichas_sacadas(self, player):
+        fuera = self.__board__.get_tablero()["fuera"]
+        return player.fichas_sacadas(fuera)
     def registrar_jugadores(self, jugador1, jugador2):
         self.__jugadores__[jugador1.get_nombre()] = jugador1
         self.__jugadores__[jugador2.get_nombre()] = jugador2
