@@ -1,6 +1,5 @@
-
 import unittest
-from core.clases.Dice import Dice  
+from core.clases.dice import Dice  
 
 class TestDice(unittest.TestCase):
 
