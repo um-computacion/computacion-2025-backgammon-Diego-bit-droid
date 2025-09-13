@@ -4,7 +4,9 @@ Todas las modificaciones notables a este proyecto se documentarán en este archi
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
-## [1.0.1] - 2025-08-29
+## [1.1.1] - 2025-08-29
 
 ### Agregado 
-- Metodo calcular movimientos 
+- Metodo lanzar dado
+- Metodo y forma nueva para crear fichas y tablero
+- Metodo obtener estado del jugador
