@@ -1,4 +1,5 @@
-from core.clases.board import Board  
+from core.clases.board import Board
+from core.clases.dice import Dice  
 
 class BackgammonGame:
     def __init__(self):
@@ -6,6 +7,7 @@ class BackgammonGame:
         self.__movimientos_restantes__ = 0 #usar en lanzar dados y mover ficha
         self.__board__ = Board()
         self.__jugadores__ = {}
+        self.__dice__ = Dice()
    
     def get_fichas_en_tablero(self, player):
         posiciones = self.__board__.get_tablero()["posiciones"]
@@ -27,23 +29,22 @@ class BackgammonGame:
     
     def quien_empieza(self):
         while True:
-            jugador1 = self.lanzar_dado()
-            jugador2 = self.lanzar_dado()
+            dado1, _ = self.__dice__.lanzar_dados()
+            dado2, _ = self.__dice__.lanzar_dados()
 
-            print(f"Jugador 1 sacó: {jugador1}")
-            print(f"Jugador 2 sacó: {jugador2}")
+            print(f"Jugador 1 sacó: {dado1}")
+            print(f"Jugador 2 sacó: {dado2}")
 
-            if jugador1 > jugador2:
+            if dado1 > dado2:
                 self.__turno__ = 1
                 print("Jugador 1 empieza")
                 return 1
-            elif jugador2 > jugador1:
+            elif dado2 > dado1:
                 self.__turno__ = 2
                 print("Jugador 2 empieza")
                 return 2
             else:
                 print("Empate, se vuelve a lanzar")
-
     def get_tablero(self):
         return self.__board__.get_tablero()
 
