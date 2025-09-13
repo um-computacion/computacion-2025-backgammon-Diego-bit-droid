@@ -1,6 +1,4 @@
 from core.clases.board import Board  
-from core.clases.Dice import Dice
-from core.clases.Player import Player
 
 class BackgammonGame:
     def __init__(self):
