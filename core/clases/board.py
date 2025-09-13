@@ -1,4 +1,4 @@
-from core.clases.Checker import Checker
+from core.clases.checker import Checker
 
 class Board:
     def __init__(self):
@@ -92,8 +92,24 @@ class Board:
         print(f"FUERA P1: {self.__fuera__['player1']} fichas | FUERA P2: {self.__fuera__['player2']} fichas")
         print("="*60)
         #implementar a la hora de mostrar el tablero que se muestre el estado de cada jugador
+    def puede_comer(self, hasta, jugador):
+        destino = self.__posiciones__[hasta]
+        if len(destino) == 1 and destino[0].simbolo != jugador.simbolo:
+            return True
+        return False
 
-   # def mover_ficha(self, desde, hasta, jugador):
+    def mover_ficha(self, desde, hasta, jugador):
+        simbolo = jugador.simbolo
+        # Desde el bar
+        if desde == "bar":
+            if self.__bar__[jugador.nombre] == 0:
+                return False
+            if self.puede_comer(hasta, jugador):
+                enemigo = self.__posiciones__[hasta].pop()
+            self.__bar__[jugador.oponente()] += 1
+        self.__posiciones__[hasta].append(Checker(simbolo))
+        self.__bar__[jugador.nombre] -= 1
+        return True
         # mover ficha desde cualquier lugar hacia cualquier lugar:
         # del bar  al tablero 
         # de una posición del tablero (desde = 0-23) a otra (hasta = 0-23)

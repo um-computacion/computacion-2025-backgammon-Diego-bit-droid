@@ -1,6 +1,6 @@
 import unittest
-from core.clases.Player import Player
-from core.clases.BackgammonGame import BackgammonGame
+from core.clases.player import Player
+from core.clases.backgammonGame import BackgammonGame
 
 class TestBackgammonGame(unittest.TestCase):
     

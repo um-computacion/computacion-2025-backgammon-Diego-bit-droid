@@ -1,6 +1,6 @@
 import unittest
-from core.clases.Player import Player
-from core.clases.Checker import Checker
+from core.clases.player import Player
+from core.clases.checker import Checker
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):

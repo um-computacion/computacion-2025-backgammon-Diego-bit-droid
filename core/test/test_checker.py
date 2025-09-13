@@ -1,5 +1,5 @@
 import unittest
-from core.clases.Checker import Checker
+from core.clases.checker import Checker
 
 class TestChecker(unittest.TestCase):
 
