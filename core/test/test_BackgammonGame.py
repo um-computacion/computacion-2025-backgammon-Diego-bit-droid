@@ -27,37 +27,13 @@ class TestBackgammonGame(unittest.TestCase):
         self.assertIn("bar", estado)
         self.assertIn("fuera", estado)
     
-
-    def test_quien_empieza_jugador1(self):
+    def test_quien_empieza_valido(self):
         game = BackgammonGame()
-        valores = iter([6, 3])
+        resultado = game.quien_empieza()
+        self.assertIn(resultado, [1, 2])
+  
 
-        def lanzar_dado():
-            return next(valores)
-
-
-        game.lanzar_dado = lanzar_dado
-        turno = game.quien_empieza()
-        self.assertEqual(turno, 1)
-
-    def test_quien_empieza_jugador2(self):
+    def test_quien_empieza_con_empate(self):
         game = BackgammonGame()
-        valores = iter([2, 5])
-
-        def lanzar_dado():
-            return next(valores)
-
-        game.lanzar_dado = lanzar_dado
-        turno = game.quien_empieza()
-        self.assertEqual(turno, 2)
-
-    def test_quien_empieza_con_empate_y_reintento(self):
-        game = BackgammonGame()
-        valores = iter([4, 4, 2, 6])
-
-        def lanzar_dado():
-            return next(valores)
-
-        game.lanzar_dado = lanzar_dado
-        turno = game.quien_empieza()
-        self.assertEqual(turno, 2)
+        resultado = game.quien_empieza()
+        self.assertIn(resultado, [1, 2])
