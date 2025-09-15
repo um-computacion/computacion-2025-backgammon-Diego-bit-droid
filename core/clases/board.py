@@ -92,89 +92,70 @@ class Board:
         print(f"FUERA P1: {self.__fuera__['player1']} fichas | FUERA P2: {self.__fuera__['player2']} fichas")
         print("="*60)
         #implementar a la hora de mostrar el tablero que se muestre el estado de cada jugador
-    def puede_comer(self, hasta, jugador):
-        destino = self.__posiciones__[hasta]
-        if len(destino) == 1 and destino[0].simbolo != jugador.simbolo:
-            return True
-        return False
-    def mover_desde_bar(self, hasta, jugador):
-        if self.__bar__[jugador.nombre] == 0:
-            return False  # No hay fichas en el bar para mover
+    def mover_ficha(self, jugador, movimientos, dado1, dado2):
+        """ movimientos: lista de tuplas (desde, hasta)
+        dado1, dado2: valores de los dados lanzados
 
-        if not self.puede_mover_a(hasta, jugador):
-            return False  # No puede mover a esa posición (bloqueada)
+        Retorna:
+            - resultados: lista de True/False por cada movimiento
+            - dados_usados: lista de dados que se usaron
+            - dados_restantes: lista de dados que no se usaron
+            - log: lista explicando cada acción
+        """
+        dados = self.calcular_movimientos_totales(dado1, dado2)
+        resultados = []
+        dados_usados = []
+        log = []
 
-        if self.puede_comer(hasta, jugador):
-            self.__posiciones__[hasta].pop()  # Comer ficha enemiga
-            self.__bar__[jugador.oponente()] += 1  # Enviar al bar del oponente
+        for desde, hasta in movimientos:
+            distancia = self.calcular_distancia(desde, hasta, jugador)
 
-        self.__posiciones__[hasta].append(Checker(jugador.simbolo))
-        self.__bar__[jugador.nombre] -= 1  # Sacar ficha del bar
-        return True
-    def mover_desde_posicion(self, desde, hasta, jugador):
-        if self.__bar__[jugador.nombre] > 0:
-            return False  # No puede mover otras fichas si tiene fichas en el bar
+            if distancia not in dados:
+                resultados.append(False)
+                log.append(f"No se puede usar dado {distancia} para mover de {desde} a {hasta}.")
+                continue
 
-        if not self.puede_mover_a(hasta, jugador):
-            return False  # Posición bloqueada
+            # Validación previa
+            if not self.validar_movimiento(desde, hasta, jugador):
+                resultados.append(False)
+                log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.simbolo}.")
+                continue
 
-        if not self.__posiciones__[desde]:
-            return False  # No hay fichas en la posición de origen
+            # Comer ficha enemiga si corresponde
+            ficha_comida = False
+            if self.puede_comer(hasta, jugador):
+                self.__posiciones__[hasta].pop()
+                self.__bar__[jugador.oponente()] += 1
+                ficha_comida = True
 
-        ficha = self.__posiciones__[desde][-1]
-        if ficha.simbolo != jugador.simbolo:
-            return False  # La ficha no pertenece al jugador
+            # Ejecutar movimiento
+            if desde == "bar":
+                self.__bar__[jugador.nombre] -= 1
+            else:
+                self.__posiciones__[desde].pop()
 
-        self.__posiciones__[desde].pop()  # Sacar ficha del origen
+            if hasta == "fuera":
+                self.__fuera__[jugador.nombre] += 1
+                log.append(f"{jugador.simbolo} sacó ficha desde {desde} usando dado {distancia}.")
+            else:
+                self.__posiciones__[hasta].append(Checker(jugador.simbolo))
+                log.append(f"{jugador.simbolo} movió de {desde} a {hasta} usando dado {distancia}." +
+                        (" Comió ficha enemiga." if ficha_comida else ""))
 
-        if self.puede_comer(hasta, jugador):
-            self.__posiciones__[hasta].pop()
-            self.__bar__[jugador.oponente()] += 1
+            resultados.append(True)
+            dados.remove(distancia)
+            dados_usados.append(distancia)
 
-        self.__posiciones__[hasta].append(Checker(jugador.simbolo))
-        return True
-        # mover ficha desde cualquier lugar hacia cualquier lugar:
-        # del bar  al tablero 
-        # de una posición del tablero (desde = 0-23) a otra (hasta = 0-23)
-        # del tablero (desde = 0-23) al fuera (hasta = "fuera")
-        # incluye validación de movimiento inválido
-        # retorna True si movimiento exitoso, False si inválido
-        # incluye actualizacion en ficha  comidas cuando come una
-        
-        
-        pass
-    def mover_a_fuera(self, desde, jugador):
-        if self.__bar__[jugador.nombre] > 0:
-            return False  # No puede sacar fichas si tiene fichas en el bar
-
-        if not self.__posiciones__[desde]:
-            return False  # No hay fichas en la posición
-
-        ficha = self.__posiciones__[desde][-1]
-        if ficha.simbolo != jugador.simbolo:
-            return False  # No es su ficha
-
-        self.__posiciones__[desde].pop()
-        self.__fuera__[jugador.nombre] += 1
-        return True
+        return {
+            "resultados": resultados,
+            "dados_usados": dados_usados,
+            "dados_restantes": dados,
+            "log": log}
     def calcular_movimientos_totales(self,dado1,dado2):
          if dado1 == dado2:  
             return [dado1] * 4
          else:
             return [dado1, dado2]
          
-    def mover_ficha(self, desde, hasta, jugador):
-        # Movimiento desde el bar al tablero
-        if desde == "bar":
-            return self.mover_desde_bar(hasta, jugador)
-
-        # Movimiento desde el tablero hacia fuera
-        if hasta == "fuera":
-            return self.mover_a_fuera(desde, jugador)
-
-        # Movimiento entre posiciones del tablero
-        if isinstance(desde, int) and isinstance(hasta, int):
-            return self.mover_desde_posicion(desde, hasta, jugador)
-
-        # Movimiento inválido
-        return False        
+   
+   
