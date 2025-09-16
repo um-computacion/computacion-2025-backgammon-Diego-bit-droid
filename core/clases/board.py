@@ -110,6 +110,7 @@ class Board:
         for desde, hasta in movimientos:
             distancia = self.calcular_distancia(desde, hasta, jugador)
 
+
             if distancia not in dados:
                 resultados.append(False)
                 log.append(f"No se puede usar dado {distancia} para mover de {desde} a {hasta}.")
@@ -118,7 +119,7 @@ class Board:
             # Validación previa
             if not self.validar_movimiento(desde, hasta, jugador):
                 resultados.append(False)
-                log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.simbolo}.")
+                log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.ficha}.")
                 continue
 
             # Comer ficha enemiga si corresponde
@@ -136,10 +137,10 @@ class Board:
 
             if hasta == "fuera":
                 self.__fuera__[jugador.nombre] += 1
-                log.append(f"{jugador.simbolo} sacó ficha desde {desde} usando dado {distancia}.")
+                log.append(f"{jugador.ficha} sacó ficha desde {desde} usando dado {distancia}.")
             else:
-                self.__posiciones__[hasta].append(Checker(jugador.simbolo))
-                log.append(f"{jugador.simbolo} movió de {desde} a {hasta} usando dado {distancia}." +
+                self.__posiciones__[hasta].append(Checker(jugador.ficha))
+                log.append(f"{jugador.ficha} movió de {desde} a {hasta} usando dado {distancia}." +
                         (" Comió ficha enemiga." if ficha_comida else ""))
 
             resultados.append(True)
@@ -156,6 +157,24 @@ class Board:
             return [dado1] * 4
          else:
             return [dado1, dado2]
-         
-   
-   
+    def calcular_distancia(self, desde, hasta, jugador):
+        """
+        Calcula la distancia entre dos puntos según el sentido del jugador.
+        Si el movimiento es desde el 'bar' o hacia 'fuera', se traduce a posición numérica.
+        """
+        if desde == "bar":
+            desde = 0 if jugador.ficha== "X" else 23
+        if hasta == "fuera":
+            hasta = 23 if jugador.ficha == "X" else 0
+
+        if not isinstance(desde, int) or not isinstance(hasta, int):
+            raise ValueError(f"Desde y hasta deben ser enteros o palabras clave válidas ('bar', 'fuera'). Recibido: desde={desde}, hasta={hasta}")
+
+        # Sentido de movimiento
+        if jugador.ficha == "X":
+            return hasta - desde
+        else:
+            return desde - hasta
+            
+    
+    
