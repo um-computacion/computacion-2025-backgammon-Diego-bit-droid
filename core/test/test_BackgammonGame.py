@@ -37,3 +37,4 @@ class TestBackgammonGame(unittest.TestCase):
         game = BackgammonGame()
         resultado = game.quien_empieza()
         self.assertIn(resultado, [1, 2])
+ 
