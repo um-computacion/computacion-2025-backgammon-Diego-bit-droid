@@ -1,56 +1,79 @@
 class Player:
     def __init__(self, nombre, ficha):
-        self.__nombre__ = nombre  
-        self.__ficha__ = ficha    
+        """
+        Entrada:
+            nombre (str): nombre del jugador
+            ficha (str): símbolo de ficha ("X" o "O")
+        Salida:
+            None
+        """
+        self.__nombre__ = nombre
+        self.__ficha__ = ficha
+
     def get_nombre(self):
-        """devuelve el nombre del jugador
+        """
+        Entrada:
+            None
+        Salida:
+            str: nombre del jugador
         """
         return self.__nombre__
 
     def get_ficha(self):
-        """ devuelve la ficha que usa el jugador
+        """
+        Entrada:
+            None
+        Salida:
+            str: símbolo de ficha del jugador
         """
         return self.__ficha__
 
     def fichas_en_tablero(self, posiciones):
         """
-        cuenta cuantas fichas tiene el jugador en el tablero
-        revisa todas las posiciones y suma las que tienen su ficha
+        Entrada:
+            posiciones (list): lista de pilas de fichas en el tablero
+        Salida:
+            int: cantidad de fichas del jugador en el tablero
         """
-        return sum(
-            1 for pos in posiciones
-            for checker in pos
-            if checker.simbolo == self.__ficha__
-        )
+        return sum(1 for pila in posiciones for ficha in pila if ficha.get_simbolo() == self.__ficha__)
 
     def fichas_en_bar(self, bar):
         """
-        cuenta cuantas fichas tiene el jugador en el bar
-        busca en el diccionario usando su nombre
+        Entrada:
+            bar (list): lista de fichas en el bar
+        Salida:
+            int: cantidad de fichas del jugador en el bar
         """
-        return bar.get(self.__nombre__, 0)
+        return sum(1 for ficha in bar if ficha.get_simbolo() == self.__ficha__)
 
     def fichas_sacadas(self, fuera):
         """
-        str: cuenta cuantas fichas tiene el jugador fuera del juego
-        busca en el diccionario usando su nombre
+        Entrada:
+            fuera (list): lista de fichas fuera del tablero
+        Salida:
+            int: cantidad de fichas del jugador fuera del juego
         """
-        return fuera.get(self.__nombre__, 0)
+        return sum(1 for ficha in fuera if ficha.get_simbolo() == self.__ficha__)
 
     def estado_jugador(self, posiciones, bar, fuera):
-        """devuelve un resumen del estado del jugador
-        incluye el nombre la ficha que usa y cuantas fichas tiene en cada zona
-        tambien muestra el total sumando todas
+        """
+        Entrada:
+            posiciones (list): lista de pilas en el tablero
+            bar (list): lista de fichas en el bar
+            fuera (list): lista de fichas fuera del tablero
+        Salida:
+            dict: resumen del estado del jugador
         """
         en_tablero = self.fichas_en_tablero(posiciones)
         en_bar = self.fichas_en_bar(bar)
         sacadas = self.fichas_sacadas(fuera)
+        total = en_tablero + en_bar + sacadas
 
         return {
-            "nombre": self.__nombre__,
-            "ficha": self.__ficha__,
+            "nombre": self.get_nombre(),
+            "ficha": self.get_ficha(),
             "en_tablero": en_tablero,
             "en_bar": en_bar,
             "sacadas": sacadas,
-            "total": en_tablero + en_bar + sacadas
+            "total": total
         }

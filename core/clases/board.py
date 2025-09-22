@@ -158,19 +158,13 @@ class Board:
          else:
             return [dado1, dado2]
     def calcular_distancia(self, desde, hasta, jugador):
-        """
-        Calcula la distancia entre dos puntos según el sentido del jugador.
-        Si el movimiento es desde el 'bar' o hacia 'fuera', se traduce a posición numérica.
-        """
+        # convierte 'bar' y 'fuera' en posiciones numéricas
         if desde == "bar":
-            desde = 0 if jugador.ficha== "X" else 23
+            desde = 0 if jugador.ficha == "X" else 23
         if hasta == "fuera":
             hasta = 23 if jugador.ficha == "X" else 0
 
-        if not isinstance(desde, int) or not isinstance(hasta, int):
-            raise ValueError(f"Desde y hasta deben ser enteros o palabras clave válidas ('bar', 'fuera'). Recibido: desde={desde}, hasta={hasta}")
-
-        # Sentido de movimiento
+        # calcula la distancia según el sentido del jugador
         if jugador.ficha == "X":
             return hasta - desde
         else:
