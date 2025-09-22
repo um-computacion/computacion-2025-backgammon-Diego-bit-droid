@@ -176,5 +176,10 @@ class Board:
         else:
             return desde - hasta
             
-    
-    
+    def validar_movimiento(self, desde, hasta, jugador):
+        if desde != "bar" and desde in self.__posiciones__:
+            if not self.__posiciones__[desde]:
+                return False
+            return self.__posiciones__[desde][-1].simbolo == jugador.get_ficha()
+        return True
+        
