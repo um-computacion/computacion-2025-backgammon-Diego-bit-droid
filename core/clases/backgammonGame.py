@@ -47,6 +47,8 @@ class BackgammonGame:
                 print("Empate, se vuelve a lanzar")
     def get_tablero(self):
         return self.__board__.get_tablero()
+    def get_jugador_actual(self):
+        return self.__jugadores__["jugador1"] if self.__turno__ == 1 else self.__jugadores__["jugador2"]
 
 
     #def mover_ficha(self):
