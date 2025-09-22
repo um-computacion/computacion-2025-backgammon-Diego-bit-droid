@@ -1,22 +1,22 @@
-import unittest
 from core.clases.player import Player
 from core.clases.checker import Checker
+import unittest
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         self.player1 = Player("player1", "X")
         self.player2 = Player("player2", "O")
 
-        # posiciones simuladas del tablero
+        # posiciones simuladas del tablero con objetos Checker
         self.posiciones = [[] for _ in range(24)]
         self.posiciones[0] = [Checker("X"), Checker("X")]
         self.posiciones[5] = [Checker("O"), Checker("O"), Checker("O")]
         self.posiciones[11] = [Checker("X")]
         self.posiciones[12] = [Checker("O")]
 
-        # bar y fuera simulados
-        self.bar = {"player1": 2, "player2": 1}
-        self.fuera = {"player1": 3, "player2": 0}
+        # bar y fuera simulados como listas de Checker
+        self.bar = [Checker("X"), Checker("X"), Checker("O")]
+        self.fuera = [Checker("X"), Checker("X"), Checker("X")]
 
     def test_get_nombre(self):
         self.assertEqual(self.player1.get_nombre(), "player1")
