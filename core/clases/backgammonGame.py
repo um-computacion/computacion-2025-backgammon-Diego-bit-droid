@@ -1,22 +1,18 @@
-from core.clases.board import Board
-from core.clases.dice import Dice
 
 class BackgammonGame:
-    def __init__(self):
-        self.__turno__ = 0  # guarda el turno actual del juego (1 o 2)
-        self.__movimientos_restantes__ = 0  # cantidad de movimientos disponibles en el turno
-        self.__board__ = Board()  # instancia del tablero de juego
-        self.__jugadores__ = {}  # diccionario para buscar jugadores por nombre
-        self.__jugador1__ = None  # referencia al jugador 1
-        self.__jugador2__ = None  # referencia al jugador 2
-        self.__dice__ = Dice()  # instancia de los dados
-
-    def registrar_jugadores(self, jugador1, jugador2):
-        # guarda los dos jugadores en atributos internos y en el diccionario
+    def __init__(self,board,dice,jugador1,jugador2):
+        self.__board__ = board
+        self.__dice__ = dice
+        self.__turno__ = 0
+        self.__movimientos_restantes__ = 0
         self.__jugador1__ = jugador1
         self.__jugador2__ = jugador2
-        self.__jugadores__[jugador1.get_nombre()] = jugador1
-        self.__jugadores__[jugador2.get_nombre()] = jugador2
+    def get_jugador_por_nombre(self, nombre):
+        if nombre == self.__jugador1__.get_nombre():
+            return self.__jugador1__
+        elif nombre == self.__jugador2__.get_nombre():
+            return self.__jugador2__
+        return None
 
     def quien_empieza(self):
         # lanza los dados para decidir quien empieza la partida
@@ -57,7 +53,7 @@ class BackgammonGame:
         # cambia el turno al otro jugador y lanza los dados
         self.__turno__ = 2 if self.__turno__ == 1 else 1
         jugador = self.get_jugador_actual()
-        print(f"turno cambiado ahora le toca a {jugador.get_nombre()} con ficha {jugador.get_ficha()}")
+        print(f"turno cambiado ahora le toca a {jugador.get_nombre()} con ficha {jugador.get_simbolo()}")
         self.lanzar_dados()
 
     def lanzar_dados(self):
@@ -118,4 +114,4 @@ class BackgammonGame:
     def estado_turno(self):
         # imprime quien tiene el turno actual y que ficha esta usando
         jugador = self.get_jugador_actual()
-        print(f"turno actual de {jugador.get_nombre()} con ficha {jugador.get_ficha()}")
+        print(f"turno actual de {jugador.get_nombre()} con ficha {jugador.get_simbolo()}")
