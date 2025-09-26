@@ -1,12 +1,5 @@
 class Player:
     def __init__(self, nombre, ficha):
-        """
-        Entrada:
-            nombre (str): nombre del jugador
-            ficha (str): símbolo de ficha ("X" o "O")
-        Salida:
-            None
-        """
         self.__nombre__ = nombre
         self.__ficha__ = ficha
 

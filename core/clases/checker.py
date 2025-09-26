@@ -4,15 +4,27 @@ class Checker:
 
     def get_simbolo(self):
         """
-        Entrada:
-            None
-        Salida:
-            str: símbolo de la ficha
+        Devuelve el símbolo que representa la ficha.
+
+        Returns:
+            str: símbolo de la ficha, como "X" o "O".
         """
         return self.__simbolo__
 
     def __str__(self):
+        """
+        Representación informal del objeto, usada por print().
+
+        Returns:
+            str: símbolo de la ficha.
+        """
         return self.__simbolo__
 
     def __repr__(self):
-        return self.__simbolo__
+        """
+        Representación formal del objeto, usada en depuración.
+
+        Returns:
+            str: símbolo de la ficha.
+        """
+        return self
