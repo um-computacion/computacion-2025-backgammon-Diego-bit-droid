@@ -7,6 +7,15 @@ class BackgammonGame:
         self.__movimientos_restantes__ = 0
         self.__jugador1__ = jugador1
         self.__jugador2__ = jugador2
+    def calcular_movimientos_totales(self,dado1,dado2):
+         if dado1 == dado2:  
+            return [dado1] * 4
+         else:
+            return [dado1, dado2]
+    def mostrar_movimientos_disponibles(self, dado1, dado2):
+        movimientos = self.calcular_movimientos_totales(dado1, dado2)
+        print(f"Movimientos disponibles: {movimientos}")
+        
     def get_jugador_por_nombre(self, nombre):
         if nombre == self.__jugador1__.get_nombre():
             return self.__jugador1__
@@ -115,3 +124,12 @@ class BackgammonGame:
         # imprime quien tiene el turno actual y que ficha esta usando
         jugador = self.get_jugador_actual()
         print(f"turno actual de {jugador.get_nombre()} con ficha {jugador.get_simbolo()}")
+    def get_movimientos_totales(self, dado1, dado2):
+        """
+        Entrada:
+            dado1 (int): valor del primer dado
+            dado2 (int): valor del segundo dado
+        Salida:
+            list: lista de movimientos disponibles según los dados
+        """
+        return self.calcular_movimientos_totales(dado1, dado2)
