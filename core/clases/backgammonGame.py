@@ -13,6 +13,7 @@ class BackgammonGame:
          else:
             return [dado1, dado2]
     def mostrar_movimientos_disponibles(self, dado1, dado2):
+       
         movimientos = self.calcular_movimientos_totales(dado1, dado2)
         print(f"Movimientos disponibles: {movimientos}")
         
