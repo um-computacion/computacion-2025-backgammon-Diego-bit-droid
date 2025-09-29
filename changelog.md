@@ -4,9 +4,7 @@ Todas las modificaciones notables a este proyecto se documentarán en este archi
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
-## [1.2.0] - 2025-09-28
+## [1.3.0] - 2025-09-29
 
 ### Agregado
-- Implementación de tests unitarios para la clase `Board`.
-- Cobertura de casos como movimientos válidos, comer fichas, sacar fuera y entrada desde el bar.
-
+- Regla en `BackgammonGame`: si un jugador tiene fichas en el bar, debe moverlas antes de cualquier otra ficha.

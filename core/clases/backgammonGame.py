@@ -74,20 +74,30 @@ class BackgammonGame:
         return dado1, dado2
 
     def mover_ficha(self, movimientos, dado1, dado2):
-        # ejecuta los movimientos del jugador actual usando los dados
         jugador = self.get_jugador_actual()
+        nombre = jugador.get_nombre()
+        fichas_en_bar = self.__board__.get_bar(nombre)
+        if fichas_en_bar > 0:
+            movimientos_invalidos = [m for m in movimientos if m[0] != "bar"]
+            if movimientos_invalidos:
+                print(f"{nombre} tiene {fichas_en_bar} fichas en el bar. Debe moverlas antes de usar otras fichas.")
+                return {
+                    "resultados": [False] * len(movimientos),
+                    "dados_usados": [],
+                    "dados_restantes": self.get_movimientos_totales(dado1, dado2),
+                    "log": [f"Movimiento bloqueado: hay fichas en el bar que deben salir primero."]
+                }
         resultado = self.__board__.mover_ficha(jugador, movimientos, dado1, dado2)
 
         usados = len(resultado["dados_usados"])
         self.__movimientos_restantes__ -= usados
 
         for linea in resultado["log"]:
-            print(linea)  # muestra cada accion realizada
+            print(linea)  
 
         if self.__movimientos_restantes__ <= 0:
-            self.cambiar_turno()  # cambia turno si ya no hay movimientos
-
-        return resultado  # devuelve resultado del movimiento
+            self.cambiar_turno()  
+            return 
 
     def hay_ganador(self):
         # verifica si algun jugador tiene 15 fichas fuera del tablero
