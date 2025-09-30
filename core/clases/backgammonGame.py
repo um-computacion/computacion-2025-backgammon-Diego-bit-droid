@@ -72,11 +72,11 @@ class BackgammonGame:
         self.__movimientos_restantes__ = 4 if dado1 == dado2 else 2
         print(f"{self.get_jugador_actual().get_nombre()} lanzo {dado1} y {dado2} movimientos disponibles {self.__movimientos_restantes__}")
         return dado1, dado2
-
     def mover_ficha(self, movimientos, dado1, dado2):
         jugador = self.get_jugador_actual()
         nombre = jugador.get_nombre()
         fichas_en_bar = self.__board__.get_bar(nombre)
+
         if fichas_en_bar > 0:
             movimientos_invalidos = [m for m in movimientos if m[0] != "bar"]
             if movimientos_invalidos:
@@ -87,17 +87,29 @@ class BackgammonGame:
                     "dados_restantes": self.get_movimientos_totales(dado1, dado2),
                     "log": [f"Movimiento bloqueado: hay fichas en el bar que deben salir primero."]
                 }
+
+        # Verificar si el jugador intenta sacar fichas sin tener todas en el cuadrante final
+        for desde, hasta in movimientos:
+            if hasta == "fuera" and not self.__board__.puede_sacar(jugador):
+                print(f"{nombre} no puede sacar fichas aún. Todas deben estar en el cuadrante final.")
+                return {
+                    "resultados": [False] * len(movimientos),
+                    "dados_usados": [],
+                    "dados_restantes": self.get_movimientos_totales(dado1, dado2),
+                    "log": [f"Movimiento bloqueado: no se puede sacar fichas hasta que todas estén en el cuadrante final."]
+                }
+
         resultado = self.__board__.mover_ficha(jugador, movimientos, dado1, dado2)
 
         usados = len(resultado["dados_usados"])
         self.__movimientos_restantes__ -= usados
 
         for linea in resultado["log"]:
-            print(linea)  
+            print(linea)
 
         if self.__movimientos_restantes__ <= 0:
-            self.cambiar_turno()  
-            return 
+            self.cambiar_turno()
+            return
 
     def hay_ganador(self):
         # verifica si algun jugador tiene 15 fichas fuera del tablero

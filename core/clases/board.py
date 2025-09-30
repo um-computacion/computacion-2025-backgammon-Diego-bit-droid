@@ -189,3 +189,52 @@ class Board:
     def get_fuera(self, jugador):
         """Devuelve la cantidad de fichas fuera del tablero para un jugador."""
         return self.__fuera__[jugador]
+    def movimientos_validos(self, Player, dado1, dado2):
+        simbolo =Player.get_simbolo()
+        nombre = Player.get_nombre()
+        movimientos = []
+        dados = [dado1, dado2] if dado1 != dado2 else [dado1] * 4
+
+        # Si hay fichas en el bar, solo se pueden mover esas
+        if self.__bar__[nombre] > 0:
+            for dado in dados:
+                desde = "bar"
+                hasta = dado - 1 if simbolo == "X" else 24 - dado
+                if self.es_destino_valido(hasta, simbolo):
+                    movimientos.append((desde, hasta))
+            return movimientos
+
+        # Buscar fichas en el tablero que puedan moverse
+        for i, pila in enumerate(self.__posiciones__):
+            if pila and pila[-1].get_simbolo() == simbolo:
+                for dado in dados:
+                    hasta = i + dado if simbolo == "X" else i - dado
+                    if 0 <= hasta < 24 and self.es_destino_valido(hasta, simbolo):
+                        movimientos.append((i, hasta))
+
+        return movimientos
+    def puede_sacar(self, jugador):
+        """
+        Verifica si el jugador puede comenzar a sacar fichas.
+        Solo si todas sus fichas están en el cuadrante final.
+        """
+        simbolo = jugador.get_ficha()
+        nombre = jugador.get_nombre()
+        posiciones = self.__posiciones__
+        cuadrante = range(18, 24) if simbolo == "X" else range(0, 6)
+
+        total_en_tablero = 0
+        en_cuadrante = 0
+
+        for i, pila in enumerate(posiciones):
+            for ficha in pila:
+                if ficha.get_simbolo() == simbolo:
+                    total_en_tablero += 1
+                    if i in cuadrante:
+                        en_cuadrante += 1
+
+        # Sumar las fichas que ya están fuera
+        total_fuera = self.__fuera__[nombre]
+        total_jugador = total_en_tablero + total_fuera
+
+        return total_jugador == 15 and en_cuadrante == total_en_tablero
