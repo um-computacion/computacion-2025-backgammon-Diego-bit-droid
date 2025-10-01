@@ -216,7 +216,7 @@ class Board:
     def puede_sacar(self, jugador):
         """
         Verifica si el jugador puede comenzar a sacar fichas.
-        Solo si todas sus fichas están en el cuadrante final.
+        Solo si todas sus fichas están en el cuadrante final y no hay fichas en el bar.
         """
         simbolo = jugador.get_ficha()
         nombre = jugador.get_nombre()
@@ -233,8 +233,12 @@ class Board:
                     if i in cuadrante:
                         en_cuadrante += 1
 
-        # Sumar las fichas que ya están fuera
         total_fuera = self.__fuera__[nombre]
-        total_jugador = total_en_tablero + total_fuera
+        total_bar = self.__bar__[nombre]
+        total_jugador = total_en_tablero + total_fuera + total_bar
 
-        return total_jugador == 15 and en_cuadrante == total_en_tablero
+        return (
+            total_jugador == 15 and
+            en_cuadrante == total_en_tablero and
+            total_bar == 0
+        )
