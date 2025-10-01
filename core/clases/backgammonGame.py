@@ -63,7 +63,7 @@ class BackgammonGame:
         # cambia el turno al otro jugador y lanza los dados
         self.__turno__ = 2 if self.__turno__ == 1 else 1
         jugador = self.get_jugador_actual()
-        print(f"turno cambiado ahora le toca a {jugador.get_nombre()} con ficha {jugador.get_simbolo()}")
+        print(f"turno cambiado ahora le toca a {jugador.get_nombre()} con ficha {jugador.get_ficha()}")
         self.lanzar_dados()
 
     def lanzar_dados(self):
@@ -99,7 +99,7 @@ class BackgammonGame:
                     "log": [f"Movimiento bloqueado: no se puede sacar fichas hasta que todas estén en el cuadrante final."]
                 }
 
-        resultado = self.__board__.mover_ficha(jugador, movimientos, dado1, dado2)
+        resultado = self.__board__.mover_ficha(jugador, movimientos, self.calcular_movimientos_totales(dado1, dado2))
 
         usados = len(resultado["dados_usados"])
         self.__movimientos_restantes__ -= usados
@@ -109,7 +109,7 @@ class BackgammonGame:
 
         if self.__movimientos_restantes__ <= 0:
             self.cambiar_turno()
-            return
+            return resultado
 
     def hay_ganador(self):
         # verifica si algun jugador tiene 15 fichas fuera del tablero
