@@ -29,18 +29,4 @@ min-public-methods=2
 [REPORTS]
 # Disable the generation of reports.
 reports=no
-08:15
-requirements.txt
-pytest
-coverage
-requests
-pandas
-numpy
-matplotlib
-seaborn
-scipy
-scikit-learn
-statsmodels
-lxml
-beautifulsoup4
-pylint
+
