@@ -27,4 +27,4 @@ class Checker:
         Returns:
             str: símbolo de la ficha.
         """
-        return self
+        return self.__simbolo__ 
