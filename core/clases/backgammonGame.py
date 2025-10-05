@@ -115,18 +115,15 @@ class BackgammonGame:
         # verifica si algun jugador tiene 15 fichas fuera del tablero
         fuera = self.__board__.get_tablero()["fuera"]
         for jugador in [self.__jugador1__, self.__jugador2__]:
-            if jugador.fichas_sacadas(fuera) == 15:
-                print(f"{jugador.get_nombre()} ha ganado la partida")
+            nombre = jugador.get_nombre()
+            if fuera[nombre] == 15:
+                print(f"{nombre} ha ganado la partida")
                 return True
         return False
-
     def get_tablero(self):
         # devuelve el estado completo del tablero
         return self.__board__.get_tablero()
 
-    def get_jugador_por_nombre(self, nombre):
-        # busca y devuelve un jugador por su nombre
-        return self.__jugadores__.get(nombre)
 
     def get_fichas_en_tablero(self, player):
         # cuenta cuantas fichas tiene el jugador en las posiciones del tablero
@@ -146,7 +143,7 @@ class BackgammonGame:
     def estado_turno(self):
         # imprime quien tiene el turno actual y que ficha esta usando
         jugador = self.get_jugador_actual()
-        print(f"turno actual de {jugador.get_nombre()} con ficha {jugador.get_simbolo()}")
+        print(f"turno actual de {jugador.get_nombre()} con ficha {jugador.get_ficha()}")
     def get_movimientos_totales(self, dado1, dado2):
         """
         Entrada:
