@@ -242,3 +242,17 @@ class Board:
             en_cuadrante == total_en_tablero and
             total_bar == 0
         )
+    def get_fichas_en_tablero(self, jugador):
+        ficha = jugador.get_ficha()
+        return sum(1 for pila in self.__posiciones__ for f in pila if f.get_simbolo() == ficha)
+    def get_fichas_en_bar(self, jugador):
+        """
+        Devuelve la cantidad de fichas del jugador en el bar.
+        """
+        return self.get_bar(jugador.get_nombre())
+
+    def get_fichas_sacadas(self, jugador):
+        """
+        Devuelve la cantidad de fichas del jugador fuera del tablero.
+        """
+        return self.get_fuera(jugador.get_nombre())
