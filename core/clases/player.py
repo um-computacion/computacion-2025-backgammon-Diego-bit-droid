@@ -30,36 +30,24 @@ class Player:
         """
         return sum(1 for pila in posiciones for ficha in pila if ficha.get_simbolo() == self.__ficha__)
 
-    def fichas_en_bar(self, bar):
-        """
-        Entrada:
-            bar (dict): diccionario con cantidad de fichas por jugador
-        Salida:
-            int: cantidad de fichas del jugador en el bar
-        """
-        return bar[self.get_nombre()]
+    def fichas_en_bar(self, board):
+        return board.get_fichas_en_bar(self)
 
-    def fichas_sacadas(self, fuera):
-        """
-        Entrada:
-            fuera (dict): diccionario con cantidad de fichas fuera por jugador
-        Salida:
-            int: cantidad de fichas del jugador fuera del juego
-        """
-        return fuera[self.get_nombre()]
+    def fichas_sacadas(self, board):
+        return board.get_fichas_sacadas(self)
 
-    def estado_jugador(self, posiciones, bar, fuera):
+
+    def estado_jugador(self, board):
         """
         Entrada:
-            posiciones (list): lista de pilas en el tablero
-            bar (list): lista de fichas en el bar
-            fuera (list): lista de fichas fuera del tablero
+            board (Board): instancia del tablero que contiene la información del juego.
         Salida:
-            dict: resumen del estado del jugador
+            dict: resumen del estado actual del jugador.
+
         """
-        en_tablero = self.fichas_en_tablero(posiciones)
-        en_bar = self.fichas_en_bar(bar)
-        sacadas = self.fichas_sacadas(fuera)
+        en_tablero = board.get_fichas_en_tablero(self)
+        en_bar = board.get_fichas_en_bar(self)
+        sacadas = board.get_fichas_sacadas(self)
         total = en_tablero + en_bar + sacadas
 
         return {
