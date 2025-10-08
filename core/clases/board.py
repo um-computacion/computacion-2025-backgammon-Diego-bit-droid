@@ -85,7 +85,6 @@ class Board:
         for movimiento in movimientos:
             if not isinstance(movimiento, tuple) or len(movimiento) != 2:
                 raise ValueError("Cada movimiento debe ser una tupla con dos elementos.")
-
         resultados = []
         dados_usados = []
         log = []
