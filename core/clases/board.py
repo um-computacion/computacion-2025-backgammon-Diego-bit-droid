@@ -1,14 +1,24 @@
 from core.clases.checker import Checker
 
-from core.clases.checker import Checker
-
 class Board:
     def __init__(self):
+        """
+        Inicializa el tablero de backgammon:
+        - 24 posiciones vacías.
+        - Bar para fichas comidas.
+        - Área para fichas fuera del juego.
+        """
         self.__posiciones__ = self.preparar_tablero()
         self.__bar__ = {'player1': 0, 'player2': 0}
         self.__fuera__ = {'player1': 0, 'player2': 0}
 
     def get_tablero(self):
+        """
+        Devuelve el estado actual del tablero.
+
+        Returns:
+            dict: contiene posiciones, bar y fichas fuera.
+        """
         return {
             "posiciones": [list(pos) for pos in self.__posiciones__],
             "bar": dict(self.__bar__),
@@ -16,6 +26,12 @@ class Board:
         }
 
     def preparar_tablero(self):
+        """
+        Configura las posiciones iniciales del tablero.
+
+        Returns:
+            list: lista de 24 pilas con fichas iniciales.
+        """
         self.__posiciones__ = [[] for _ in range(24)]
         self.__posiciones__[0] = [Checker("X") for _ in range(2)]
         self.__posiciones__[11] = [Checker("X") for _ in range(5)]
@@ -28,6 +44,9 @@ class Board:
         return self.__posiciones__
 
     def mostrar_board(self):
+        """
+        Imprime el estado visual del tablero en consola.
+        """
         print("="*60)
         print(f"BAR P1: {self.__bar__['player1']} fichas | BAR P2: {self.__bar__['player2']} fichas\n")
         print("Posiciones 0-23:")
@@ -50,6 +69,17 @@ class Board:
         print("="*60)
 
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
+        """
+        Aplica movimientos sobre el tablero usando los dados disponibles.
+
+        Args:
+            jugador (Player): jugador que mueve.
+            movimientos (list): lista de tuplas (desde, hasta).
+            dados_disponibles (list): dados disponibles.
+
+        Returns:
+            dict: resultados del turno.
+        """
         if not isinstance(movimientos, list):
             raise TypeError("Los movimientos deben ser una lista de tuplas (desde, hasta).")
         for movimiento in movimientos:
@@ -105,6 +135,12 @@ class Board:
         }
 
     def calcular_distancia(self, desde, hasta, jugador):
+        """
+        Calcula la distancia entre dos posiciones según el sentido del jugador.
+
+        Returns:
+            int: distancia positiva.
+        """
         if desde == "bar":
             desde = 0 if jugador.get_ficha() == "X" else 23
         if hasta == "fuera":
@@ -112,6 +148,12 @@ class Board:
         return hasta - desde if jugador.get_ficha() == "X" else desde - hasta
 
     def validar_movimiento(self, desde, hasta, jugador):
+        """
+        Verifica si el movimiento es válido.
+
+        Returns:
+            bool: True si es válido, False si no.
+        """
         if isinstance(desde, int) and not (0 <= desde < 24):
             raise IndexError("Posición 'desde' fuera de rango.")
         if desde != "bar" and isinstance(desde, int):
@@ -121,50 +163,41 @@ class Board:
         return True
 
     def puede_comer(self, hasta, jugador):
+        """
+        Determina si el jugador puede comer una ficha enemiga.
+
+        Returns:
+            bool: True si hay una sola ficha enemiga, False si no.
+        """
         if not isinstance(hasta, int) or not (0 <= hasta < 24):
             return False
         pila = self.__posiciones__[hasta]
         return len(pila) == 1 and pila[-1].get_simbolo() != jugador.get_ficha()
 
     def set_posiciones(self, index, fichas):
+        """Establece fichas en una posición específica del tablero."""
         self.__posiciones__[index] = fichas
 
     def get_posiciones(self, index):
+        """
+        Devuelve las fichas en una posición específica del tablero.
+        """
         if not isinstance(index, int) or not (0 <= index < 24):
             raise IndexError("Índice fuera de rango. Debe estar entre 0 y 23.")
         return self.__posiciones__[index]
 
     def set_bar(self, jugador, cantidad):
+        """Establece la cantidad de fichas en el bar para un jugador."""
         self.__bar__[jugador] = cantidad
 
     def get_bar(self, jugador):
+        """Devuelve la cantidad de fichas en el bar para un jugador."""
         return self.__bar__[jugador]
 
     def set_fuera(self, jugador, cantidad):
+        """Establece la cantidad de fichas fuera del tablero para un jugador."""
         self.__fuera__[jugador] = cantidad
 
     def get_fuera(self, jugador):
+        """Devuelve la cantidad de fichas fuera del tablero para un jugador."""
         return self.__fuera__[jugador]
-
-    def movimientos_validos(self, Player, dado1, dado2):
-        simbolo = Player.get_simbolo()
-        nombre = Player.get_nombre()
-        movimientos = []
-        dados = [dado1, dado2] if dado1 != dado2 else [dado1] * 4
-
-        if self.__bar__[nombre] > 0:
-            for dado in dados:
-                desde = "bar"
-                hasta = dado - 1 if simbolo == "X" else 24 - dado
-                if self.es_destino_valido(hasta, simbolo):
-                    movimientos.append((desde, hasta))
-            return movimientos
-
-        for i, pila in enumerate(self.__posiciones__):
-            if pila and pila[-1].get_simbolo() == simbolo:
-                for dado in dados:
-                    hasta = i + dado if simbolo == "X" else i - dado
-                    if 0 <= hasta < 24 and self.es_destino_valido(hasta, simbolo):
-                        movimientos.append((i, hasta))
-
-        return movimientos
