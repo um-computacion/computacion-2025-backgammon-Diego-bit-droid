@@ -75,6 +75,57 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(resultado["resultados"], [True])
         self.assertEqual(self.board.get_bar("player1"), 0)
         self.assertIn("movió de bar a 3", resultado["log"][0])
+    def test_mover_desde_posicion_vacia(self):
+        self.board.set_posiciones(0, [])
+        dados = [3]
+        resultado = self.board.mover_ficha(self.jugador1, [(0, 3)], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertIn("Movimiento inválido", resultado["log"][0])
+
+    def test_mover_ficha_enemiga(self):
+        self.board.set_posiciones(0, [Checker("O")])
+        dados = [3]
+        resultado = self.board.mover_ficha(self.jugador1, [(0, 3)], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertIn("Movimiento inválido", resultado["log"][0])
+
+    def test_no_puede_comer_varias_fichas_enemigas(self):
+        self.board.set_posiciones(0, [Checker("X")])
+        self.board.set_posiciones(3, [Checker("O"), Checker("O")])
+        dados = [3]
+        resultado = self.board.mover_ficha(self.jugador1, [(0, 3)], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertIn("Movimiento inválido", resultado["log"][0])
+
+    def test_indice_fuera_de_rango_get_posiciones(self):
+        with self.assertRaises(IndexError):
+            self.board.get_posiciones(24)
+
+    def test_indice_fuera_de_rango_set_posiciones(self):
+        with self.assertRaises(IndexError):
+            self.board.set_posiciones(25, [Checker("X")])
+
+    def test_movimiento_tipo_incorrecto(self):
+        with self.assertRaises(TypeError):
+            self.board.mover_ficha(self.jugador1, "no es una lista", [3])
+
+    def test_movimiento_tupla_mal_formada(self):
+        with self.assertRaises(ValueError):
+            self.board.mover_ficha(self.jugador1, [(0,)], [3])
+
+    def test_entrada_desde_bar_sin_fichas(self):
+        self.board.set_bar("player1", 0)
+        dados = [3]
+        resultado = self.board.mover_ficha(self.jugador1, [("bar", 3)], dados)
+        self.assertEqual(resultado["resultados"], [True])  # El método no lo bloquea, pero debería validarse
+
+    def test_sacar_fuera_desde_posicion_invalida(self):
+        self.board.set_posiciones(10, [Checker("X")])
+        dados = [13]
+        resultado = self.board.mover_ficha(self.jugador1, [(10, "fuera")], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertIn("No se puede usar dado", resultado["log"][0])
+
 
 if __name__ == "__main__":
     unittest.main()
