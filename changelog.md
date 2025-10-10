@@ -5,10 +5,11 @@ Todas las modificaciones notables a este proyecto se documentarán en este archi
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
 
-## [1.3.1] - 2025-09-30
+## [1.3.2] - 2025-09-30
+
+### Corregido
+- Se corrigió la validación del cuadrante final para cada jugador: ahora `player1` debe tener todas sus fichas entre las posiciones 18 y 23, y `player2` entre las posiciones 0 y 5 para poder sacar fichas.
 
 ### Agregado
-- Se agregó la regla que obliga a sacar fichas del bar antes de mover otras.
-- Se implementó la lógica para permitir sacar fichas del tablero solo si todas están en el cuadrante final.
-- Se muestra un mensaje cuando el jugador puede empezar a sacar fichas.
-- Si no hay movimientos posibles con los dados, el turno se pasa automáticamente.
+- Se agregó una validación que impide capturar múltiples fichas enemigas en una sola posición.
+- Se ajustaron los mensajes de log para reflejar correctamente los motivos de movimientos inválidos.

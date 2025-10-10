@@ -69,22 +69,12 @@ class Board:
         print("="*60)
 
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
-        """
-        Aplica movimientos sobre el tablero usando los dados disponibles.
-
-        Args:
-            jugador (Player): jugador que mueve.
-            movimientos (list): lista de tuplas (desde, hasta).
-            dados_disponibles (list): dados disponibles.
-
-        Returns:
-            dict: resultados del turno.
-        """
         if not isinstance(movimientos, list):
             raise TypeError("Los movimientos deben ser una lista de tuplas (desde, hasta).")
         for movimiento in movimientos:
             if not isinstance(movimiento, tuple) or len(movimiento) != 2:
                 raise ValueError("Cada movimiento debe ser una tupla con dos elementos.")
+
         resultados = []
         dados_usados = []
         log = []
@@ -101,6 +91,21 @@ class Board:
                 resultados.append(False)
                 log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.get_ficha()}.")
                 continue
+
+            if isinstance(hasta, int):
+                pila_destino = self.__posiciones__[hasta]
+                if pila_destino and pila_destino[-1].get_simbolo() != jugador.get_ficha():
+                    if len(pila_destino) > 1:
+                        resultados.append(False)
+                        log.append(f"Movimiento inválido: no se puede comer múltiples fichas enemigas en {hasta}.")
+                        continue
+
+            
+            if hasta == "fuera":
+                if not self.esta_en_cuadrante_final(desde, jugador):
+                    resultados.append(False)
+                    log.append(f"No se puede usar dado para sacar ficha desde {desde}, fuera del cuadrante final.")
+                    continue
 
             ficha_comida = False
             if self.puede_comer(hasta, jugador):
@@ -120,7 +125,7 @@ class Board:
             else:
                 self.__posiciones__[hasta].append(Checker(jugador.get_ficha()))
                 log.append(f"{jugador.get_ficha()} movió de {desde} a {hasta} usando dado {distancia}." +
-                           (" Comió ficha enemiga." if ficha_comida else ""))
+                        (" Comió ficha enemiga." if ficha_comida else ""))
 
             resultados.append(True)
             dados_disponibles.remove(distancia)
@@ -200,3 +205,10 @@ class Board:
     def get_fuera(self, jugador):
         """Devuelve la cantidad de fichas fuera del tablero para un jugador."""
         return self.__fuera__[jugador]
+    def esta_en_cuadrante_final(self, posicion, jugador):
+        if not isinstance(posicion, int):
+            return False
+        if jugador.get_nombre() == "player1":
+            return 18 <= posicion <= 23
+        else:  # player2
+            return 0 <= posicion <= 5
