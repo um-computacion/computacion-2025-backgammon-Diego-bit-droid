@@ -1,12 +1,13 @@
-
+from validaciones import regla_bar, regla_salida_final, MovimientoInvalidoError
 class BackgammonGame:
-    def __init__(self,board,dice,jugador1,jugador2):
+    def __init__(self, board, dice, jugador1, jugador2, reglas=None):
         self.__board__ = board
         self.__dice__ = dice
         self.__turno__ = 0
         self.__movimientos_restantes__ = 0
         self.__jugador1__ = jugador1
         self.__jugador2__ = jugador2
+        self.__reglas__ = reglas if reglas else []
     def calcular_movimientos_totales(self,dado1,dado2):
          if dado1 == dado2:  
             return [dado1] * 4
@@ -74,43 +75,30 @@ class BackgammonGame:
         return dado1, dado2
     def mover_ficha(self, movimientos, dado1, dado2):
         jugador = self.get_jugador_actual()
-        nombre = jugador.get_nombre()
-        fichas_en_bar = self.__board__.get_bar(nombre)
+        dados_disponibles = self.calcular_movimientos_totales(dado1, dado2)
 
-        if fichas_en_bar > 0:
-            movimientos_invalidos = [m for m in movimientos if m[0] != "bar"]
-            if movimientos_invalidos:
-                print(f"{nombre} tiene {fichas_en_bar} fichas en el bar. Debe moverlas antes de usar otras fichas.")
-                return {
-                    "resultados": [False] * len(movimientos),
-                    "dados_usados": [],
-                    "dados_restantes": self.get_movimientos_totales(dado1, dado2),
-                    "log": [f"Movimiento bloqueado: hay fichas en el bar que deben salir primero."]
-                }
+        try:
+            for regla in self.__reglas__:
+                regla(jugador, movimientos, dados_disponibles, self.__board__)
+        except MovimientoInvalidoError as e:
+            print(e.mensaje)
+            return {
+                "resultados": [False] * len(movimientos),
+                "dados_usados": [],
+                "dados_restantes": dados_disponibles,
+                "log": [e.mensaje]
+            }
 
-        # Verificar si el jugador intenta sacar fichas sin tener todas en el cuadrante final
-        for desde, hasta in movimientos:
-            if hasta == "fuera" and not self.__board__.puede_sacar(jugador):
-                print(f"{nombre} no puede sacar fichas aún. Todas deben estar en el cuadrante final.")
-                return {
-                    "resultados": [False] * len(movimientos),
-                    "dados_usados": [],
-                    "dados_restantes": self.get_movimientos_totales(dado1, dado2),
-                    "log": [f"Movimiento bloqueado: no se puede sacar fichas hasta que todas estén en el cuadrante final."]
-                }
-
-        resultado = self.__board__.mover_ficha(jugador, movimientos, self.calcular_movimientos_totales(dado1, dado2))
-
-        usados = len(resultado["dados_usados"])
-        self.__movimientos_restantes__ -= usados
+        resultado = self.__board__.mover_ficha(jugador, movimientos, dados_disponibles)
+        self.__movimientos_restantes__ -= len(resultado["dados_usados"])
 
         for linea in resultado["log"]:
             print(linea)
 
         if self.__movimientos_restantes__ <= 0:
             self.cambiar_turno()
-            return resultado
 
+        return resultado
     def hay_ganador(self):
         # verifica si algun jugador tiene 15 fichas fuera del tablero
         fuera = self.__board__.get_tablero()["fuera"]
@@ -123,8 +111,6 @@ class BackgammonGame:
     def get_tablero(self):
         # devuelve el estado completo del tablero
         return self.__board__.get_tablero()
-
-
     def get_fichas_en_tablero(self, player):
         # cuenta cuantas fichas tiene el jugador en las posiciones del tablero
         posiciones = self.__board__.get_tablero()["posiciones"]
@@ -153,3 +139,5 @@ class BackgammonGame:
             list: lista de movimientos disponibles según los dados
         """
         return self.calcular_movimientos_totales(dado1, dado2)
+
+    
