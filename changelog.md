@@ -5,11 +5,12 @@ Todas las modificaciones notables a este proyecto se documentarán en este archi
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
 
-## [1.3.2] - 2025-09-30
-
-### Corregido
-- Se corrigió la validación del cuadrante final para cada jugador: ahora `player1` debe tener todas sus fichas entre las posiciones 18 y 23, y `player2` entre las posiciones 0 y 5 para poder sacar fichas.
+## [1.3.3] - 2025-10-12
 
 ### Agregado
-- Se agregó una validación que impide capturar múltiples fichas enemigas en una sola posición.
-- Se ajustaron los mensajes de log para reflejar correctamente los motivos de movimientos inválidos.
+- Se incorporaron excepciones personalizadas en español para validar errores de juego, dados, turnos y movimientos
+- Se agregaron validaciones explícitas en `BackgammonGame` que lanzan estas excepciones en puntos críticos del flujo.
+- Se implementaron pruebas unitarias para verificar que las excepciones se lanzan correctamente y contienen los mensajes esperados.
+
+### Mejorado
+- Se refactorizó `BackgammonGame` para cumplir con los principios SOLID, especialmente SRP, OCP y DIP.
