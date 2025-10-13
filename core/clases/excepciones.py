@@ -52,3 +52,21 @@ class DadosNoLanzadosError(ErrorDados):
 
 class ValorDadoInvalidoError(ErrorDados):
     """Se lanza cuando los dados muestran valores fuera del rango permitido (1–6)."""
+#board
+class ErrorTablero(ErrorBackgammon):
+    """Excepción base para errores relacionados con el tablero."""
+
+class PuntoInvalidoError(ErrorTablero):
+    """Se lanza al acceder a una posición del tablero fuera del rango válido."""
+
+class MovimientoInvalidoError(ErrorTablero):
+    """Se lanza al intentar realizar un movimiento inválido en el tablero."""
+
+class ComerMultipleFichasError(ErrorTablero):
+    """Se lanza cuando se intenta comer más de una ficha enemiga en una posición."""
+
+class SacarFueraDesdePosicionInvalidaError(ErrorTablero):
+    """Se lanza cuando se intenta sacar una ficha desde fuera del cuadrante final."""
+
+class MovimientoMalFormadoError(ErrorTablero):
+    """Se lanza cuando un movimiento no está representado como una tupla válida (desde, hasta)."""

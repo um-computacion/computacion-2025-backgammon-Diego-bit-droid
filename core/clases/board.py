@@ -1,5 +1,5 @@
 from core.clases.checker import Checker
-
+from core.clases.excepciones import (MovimientoInvalidoError,PuntoInvalidoError,MovimientoMalFormadoError)
 class Board:
     def __init__(self):
         """
@@ -70,10 +70,10 @@ class Board:
 
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
         if not isinstance(movimientos, list):
-            raise TypeError("Los movimientos deben ser una lista de tuplas (desde, hasta).")
+            raise MovimientoMalFormadoError("Los movimientos deben ser una lista de tuplas (desde, hasta).")
         for movimiento in movimientos:
             if not isinstance(movimiento, tuple) or len(movimiento) != 2:
-                raise ValueError("Cada movimiento debe ser una tupla con dos elementos.")
+                raise MovimientoMalFormadoError("Cada movimiento debe ser una tupla con dos elementos.")
 
         resultados = []
         dados_usados = []
@@ -87,9 +87,18 @@ class Board:
                 log.append(f"No se puede usar dado {distancia} para mover de {desde} a {hasta}.")
                 continue
 
-            if not self.validar_movimiento(desde, hasta, jugador):
+            try:
+                if not self.validar_movimiento(desde, hasta, jugador):
+                    resultados.append(False)
+                    log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.get_ficha()}.")
+                    continue
+            except MovimientoInvalidoError as e:
                 resultados.append(False)
-                log.append(f"Movimiento inválido de {desde} a {hasta} para jugador {jugador.get_ficha()}.")
+                log.append(str(e))
+                continue
+            except PuntoInvalidoError as e:
+                resultados.append(False)
+                log.append(str(e))
                 continue
 
             if isinstance(hasta, int):
@@ -100,7 +109,6 @@ class Board:
                         log.append(f"Movimiento inválido: no se puede comer múltiples fichas enemigas en {hasta}.")
                         continue
 
-            
             if hasta == "fuera":
                 if not self.esta_en_cuadrante_final(desde, jugador):
                     resultados.append(False)
@@ -108,11 +116,16 @@ class Board:
                     continue
 
             ficha_comida = False
-            if self.puede_comer(hasta, jugador):
-                self.__posiciones__[hasta].pop()
-                oponente = "player2" if jugador.get_nombre() == "player1" else "player1"
-                self.__bar__[oponente] += 1
-                ficha_comida = True
+            try:
+                if self.puede_comer(hasta, jugador):
+                    self.__posiciones__[hasta].pop()
+                    oponente = "player2" if jugador.get_nombre() == "player1" else "player1"
+                    self.__bar__[oponente] += 1
+                    ficha_comida = True
+            except PuntoInvalidoError as e:
+                resultados.append(False)
+                log.append(str(e))
+                continue
 
             if desde == "bar":
                 self.__bar__[jugador.get_nombre()] -= 1
@@ -135,9 +148,7 @@ class Board:
             "resultados": resultados,
             "dados_usados": dados_usados,
             "dados_restantes": dados_disponibles,
-            "log": log
-        }
-
+            "log": log}
     def calcular_distancia(self, desde, hasta, jugador):
         """
         Calcula la distancia entre dos posiciones según el sentido del jugador.
@@ -159,12 +170,14 @@ class Board:
             bool: True si es válido, False si no.
         """
         if isinstance(desde, int) and not (0 <= desde < 24):
-            raise IndexError("Posición 'desde' fuera de rango.")
+            raise PuntoInvalidoError(f"Posición 'desde' fuera de rango: {desde}")
         if desde != "bar" and isinstance(desde, int):
             if not self.__posiciones__[desde]:
                 return False
-            return self.__posiciones__[desde][-1].get_simbolo() == jugador.get_ficha()
+            if self.__posiciones__[desde][-1].get_simbolo() != jugador.get_ficha():
+                raise MovimientoInvalidoError(f"La ficha en {desde} no pertenece al jugador.")
         return True
+
 
     def puede_comer(self, hasta, jugador):
         """
@@ -174,9 +187,10 @@ class Board:
             bool: True si hay una sola ficha enemiga, False si no.
         """
         if not isinstance(hasta, int) or not (0 <= hasta < 24):
-            return False
+            raise PuntoInvalidoError(f"Posición 'hasta' fuera de rango: {hasta}")
         pila = self.__posiciones__[hasta]
         return len(pila) == 1 and pila[-1].get_simbolo() != jugador.get_ficha()
+
 
     def set_posiciones(self, index, fichas):
         """Establece fichas en una posición específica del tablero."""
@@ -187,8 +201,9 @@ class Board:
         Devuelve las fichas en una posición específica del tablero.
         """
         if not isinstance(index, int) or not (0 <= index < 24):
-            raise IndexError("Índice fuera de rango. Debe estar entre 0 y 23.")
+            raise PuntoInvalidoError(f"Índice fuera de rango: {index}")
         return self.__posiciones__[index]
+
 
     def set_bar(self, jugador, cantidad):
         """Establece la cantidad de fichas en el bar para un jugador."""
