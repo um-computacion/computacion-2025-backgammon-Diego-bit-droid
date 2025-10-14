@@ -171,7 +171,11 @@ class Board:
         """
         if isinstance(desde, int) and not (0 <= desde < 24):
             raise PuntoInvalidoError(f"Posición 'desde' fuera de rango: {desde}")
-        if desde != "bar" and isinstance(desde, int):
+
+        if desde == "bar":
+            if self.__bar__[jugador.get_nombre()] == 0:
+                raise MovimientoInvalidoError(f"No hay fichas en el bar para {jugador.get_nombre()}.")
+        elif isinstance(desde, int):
             if not self.__posiciones__[desde]:
                 return False
             if self.__posiciones__[desde][-1].get_simbolo() != jugador.get_ficha():
@@ -194,7 +198,11 @@ class Board:
 
     def set_posiciones(self, index, fichas):
         """Establece fichas en una posición específica del tablero."""
+        if not isinstance(index, int) or not (0 <= index < 24):
+            raise PuntoInvalidoError(f"Índice fuera de rango: {index}")
         self.__posiciones__[index] = fichas
+            
+       
 
     def get_posiciones(self, index):
         """
