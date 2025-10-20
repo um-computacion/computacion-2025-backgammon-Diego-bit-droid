@@ -192,7 +192,7 @@ class TestBackgammonGameIntegrado(unittest.TestCase):
         }
 
         self.game.mover_ficha([(0, 1)], 3, 4)
-        self.assertEqual(self.game.__turno__, 2)  # Verifica que el turno cambió
+        self.assertEqual(self.game.__turno__, 2)  
 
     def test_get_jugador_por_nombre_valido_player2(self):
         jugador = self.game.get_jugador_por_nombre("player2")
@@ -200,14 +200,10 @@ class TestBackgammonGameIntegrado(unittest.TestCase):
     def test_mover_ficha_regla_invalida(self):
         self.game.__turno__ = 1
         self.game.__movimientos_restantes__ = 2
-
-        # No simules board.mover_ficha — queremos que la regla interrumpa antes
         self.game.__reglas__ = [regla_invalida]
 
         resultado = self.game.mover_ficha([(0, 1)], 3, 4)
-
-        # Verificamos que el movimiento fue bloqueado por la regla
-        self.assertEqual(resultado["resultados"], [False])  # o del largo que uses
+        self.assertEqual(resultado["resultados"], [False])  
         self.assertEqual(resultado["dados_usados"], [])
         self.assertIn("Movimiento inválido por regla", resultado["log"][0])
 
