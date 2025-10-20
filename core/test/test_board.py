@@ -143,5 +143,33 @@ class TestBoard(unittest.TestCase):
             self.board.set_posiciones(i, [])
         self.board.set_posiciones(10, [Checker("X")])
         self.assertFalse(self.board.puede_sacar(self.jugador1))
+    def test_set_posiciones_valido(self):
+        fichas = [Checker("X"), Checker("X")]
+        self.board.set_posiciones(0, fichas)
+        self.assertEqual(self.board.get_posiciones(0), fichas)
+    def test_set_posiciones_fuera_de_rango(self):
+        with self.assertRaises(PuntoInvalidoError):
+            self.board.set_posiciones(24, [])
+    def test_get_posiciones_valido(self):
+        self.board.set_posiciones(5, [Checker("O")])
+        fichas = self.board.get_posiciones(5)
+        self.assertEqual(len(fichas), 1)
+        self.assertEqual(fichas[0].get_simbolo(), "O")
+    def test_get_posiciones_fuera_de_rango(self):
+        with self.assertRaises(PuntoInvalidoError):
+            self.board.get_posiciones(-1)
+    def test_puede_comer_fuera_de_rango(self):
+        with self.assertRaises(PuntoInvalidoError):
+            self.board.puede_comer(24, self.jugador1)
+    def test_set_bar_y_get_bar(self):
+        self.board.set_bar("player1", 3)
+        self.assertEqual(self.board.get_bar("player1"), 3)
+    def test_set_fuera_y_get_fuera(self):
+        self.board.set_fuera("player2", 5)
+        self.assertEqual(self.board.get_fuera("player2"), 5)
+    def test_set_fuera_y_get_fuera_directo_player1(self):
+        self.board.set_fuera("player1", 4)
+        cantidad = self.board.get_fuera("player1")
+        self.assertEqual(cantidad, 4)
 if __name__ == "__main__":
     unittest.main()
