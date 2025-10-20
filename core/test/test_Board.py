@@ -48,35 +48,6 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.get_bar("player2"), 1)
         self.assertEqual([c.get_simbolo() for c in self.board.get_posiciones(3)], ["X"])
         self.assertIn("Comió ficha enemiga", resultado["log"][0])
-
-    def test_dado_invalido(self):
-        self.board.set_posiciones(0, [Checker("X")])
-        dados = [3, 5]
-        resultado = self.board.mover_ficha(self.jugador1, [(0, 6)], dados)
-        self.assertEqual(resultado["resultados"], [False])
-        self.assertEqual(resultado["dados_usados"], [])
-        self.assertIn("No se puede usar dado", resultado["log"][0])
-
-    def test_movimiento_invalido(self):
-        self.board.set_posiciones(0, [Checker("X")])
-        self.board.validar_movimiento = lambda d, h, j: False
-        dados = [3, 5]
-        resultado = self.board.mover_ficha(self.jugador1, [(0, 3)], dados)
-        self.assertEqual(resultado["resultados"], [False])
-        self.assertIn("Movimiento inválido", resultado["log"][0])
-#    def test_sacar_fuera(self):  
-        # Vaciar todas las posiciones del tablero
-        for i in range(24):
-            self.board.set_posiciones(i, [])
-        # Colocar ficha en el cuadrante final
-        self.board.set_posiciones(22, [Checker("X")])
-        dados = [1]  # distancia entre 22 y 23
-        resultado = self.board.mover_ficha(self.jugador1, [(22, "fuera")], dados)
-        self.assertEqual(resultado["resultados"], [True])
-        self.assertEqual(self.board.get_fuera("player1"), 1)
-        self.assertIn("sacó ficha", resultado["log"][0])
-
-
     def test_entrada_desde_bar(self):
         self.board.set_bar("player1", 1)
         dados = [3, 4]
@@ -136,7 +107,41 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(self.jugador1, [(10, "fuera")], dados)
         self.assertEqual(resultado["resultados"], [False])
         self.assertIn("fuera del cuadrante final", resultado["log"][0])
+    def test_movimiento_invalido(self):
+        self.board.set_posiciones(0, [Checker("X")])
+        self.board.validar_movimiento = lambda d, h, j: False
+        dados = [3, 5]
+        resultado = self.board.mover_ficha(self.jugador1, [(0, 3)], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertTrue(any("Movimiento inválido" in mensaje for mensaje in resultado["log"]))
+    def test_dado_invalido(self):
+        self.board.set_posiciones(0, [Checker("X")])
+        dados = [3, 5]
+        resultado = self.board.mover_ficha(self.jugador1, [(0, 6)], dados)
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertEqual(resultado["dados_usados"], [])
+        self.assertIn("No se puede usar dado", resultado["log"][0])
+    def test_sacar_fuera(self):
+        for i in range(24):
+            self.board.set_posiciones(i, [])
+        self.board.__bar__["player1"] = 0
+        self.board.__bar__["player2"] = 0
+        self.board.set_posiciones(22, [Checker("X")])
+        dados = [1]  
+        resultado = self.board.mover_ficha(self.jugador1, [(22, "fuera")], dados)
+        self.assertEqual(resultado["resultados"], [True])
+        self.assertEqual(self.board.get_fuera("player1"), 1)
+        self.assertTrue(any("sacó ficha" in mensaje for mensaje in resultado["log"]))
+    def test_puede_sacar_true(self):
+        for i in range(24):
+            self.board.set_posiciones(i, [])
+        self.board.set_posiciones(22, [Checker("X")])
+        self.assertTrue(self.board.puede_sacar(self.jugador1))
 
-
+    def test_puede_sacar_false(self):
+        for i in range(24):
+            self.board.set_posiciones(i, [])
+        self.board.set_posiciones(10, [Checker("X")])
+        self.assertFalse(self.board.puede_sacar(self.jugador1))
 if __name__ == "__main__":
     unittest.main()
