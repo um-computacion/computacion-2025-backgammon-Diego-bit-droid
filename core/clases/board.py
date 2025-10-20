@@ -190,11 +190,12 @@ class Board:
         Returns:
             bool: True si hay una sola ficha enemiga, False si no.
         """
+        if hasta == "fuera":
+            return False  # No se puede comer en "fuera"
         if not isinstance(hasta, int) or not (0 <= hasta < 24):
             raise PuntoInvalidoError(f"Posición 'hasta' fuera de rango: {hasta}")
         pila = self.__posiciones__[hasta]
         return len(pila) == 1 and pila[-1].get_simbolo() != jugador.get_ficha()
-
 
     def set_posiciones(self, index, fichas):
         """Establece fichas en una posición específica del tablero."""
@@ -235,3 +236,16 @@ class Board:
             return 18 <= posicion <= 23
         else:  # player2
             return 0 <= posicion <= 5
+    def puede_sacar(self, jugador):
+        """
+        Verifica si todas las fichas del jugador están en el cuadrante final.
+
+        Returns:
+            bool: True si puede sacar fichas, False si no.
+        """
+        for i in range(24):
+            pila = self.__posiciones__[i]
+            if pila and pila[-1].get_simbolo() == jugador.get_ficha():
+                if not self.esta_en_cuadrante_final(i, jugador):
+                    return False
+        return True

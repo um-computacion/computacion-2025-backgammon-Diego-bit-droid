@@ -1,4 +1,4 @@
-from core.clases.validaciones import regla_bar, regla_salida_final, MovimientoInvalidoError
+from core.clases.validaciones import  MovimientoInvalidoError
 from core.clases.excepciones import (JuegoNoInicializadoError,
     TurnoJugadorInvalidoError,
     JuegoYaFinalizadoError,
@@ -10,7 +10,7 @@ class BackgammonGame:
     def __init__(self, board, dice, jugador1, jugador2, reglas=None):
         self.__board__ = board
         self.__dice__ = dice
-        self.__turno__ = 1
+        self.__turno__ = 0
         self.__movimientos_restantes__ = 0
         self.__jugador1__ = jugador1
         self.__jugador2__ = jugador2
