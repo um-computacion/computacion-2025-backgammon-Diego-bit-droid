@@ -1,4 +1,8 @@
+"""Módulo que define la clase Player para representar a un jugador en Backgammon."""
+
 class Player:
+    """Representa a un jugador de Backgammon con nombre y símbolo de ficha."""
+
     def __init__(self, nombre, ficha):
         """Crea un jugador con un nombre y una ficha."""
         self.__nombre__ = nombre
@@ -15,7 +19,10 @@ class Player:
     def fichas_en_tablero(self, board):
         """Cuenta cuántas fichas del jugador hay en el tablero."""
         posiciones = board.get_tablero()["posiciones"]
-        return sum(1 for pila in posiciones for ficha in pila if ficha.get_simbolo() == self.__ficha__)
+        return sum(
+            1 for pila in posiciones for ficha in pila
+            if ficha.get_simbolo() == self.__ficha__
+        )
 
     def fichas_en_bar(self, board):
         """Devuelve cuántas fichas del jugador están en el bar."""
