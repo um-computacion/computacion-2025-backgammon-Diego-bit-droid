@@ -8,7 +8,7 @@ class MovimientoInvalidoError(Exception):
         self.mensaje = mensaje
 
 
-def regla_bar(jugador, movimientos,dados,board):
+def regla_bar(jugador, movimientos,_dados,board):
     """
     Valida que el jugador mueva primero las fichas del bar si las tiene.
 
@@ -29,7 +29,7 @@ def regla_bar(jugador, movimientos,dados,board):
         )
 
 
-def regla_salida_final(jugador, movimientos,dados,board):
+def regla_salida_final(jugador, movimientos,_dados,board):
     """
     Valida que el jugador solo saque fichas si todas están en el cuadrante final.
 
