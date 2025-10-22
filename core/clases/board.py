@@ -54,10 +54,78 @@ class Board:
         return self.__posiciones__
 
     def mostrar_board(self):
-        """Muestra el tablero en consola."""
-        # Implementar visualización del tablero
-        return self.get_tablero()
+        """
+        Muestra una representación visual del tablero en consola
+        y devuelve el estado actual del tablero.
 
+        Returns:
+            dict: Estado completo del tablero con posiciones, bar y fuera
+        """
+        # Obtener estado del tablero
+        estado = self.get_tablero()
+        print("="*60)
+
+        bar_p1 = self.__bar__['player1']
+        bar_p2 = self.__bar__['player2']
+        print(f"BAR P1: {bar_p1} fichas | BAR P2: {bar_p2} fichas")
+        print()
+
+        print("Posiciones 0-23:")
+        print("-" * 50)
+
+        # Header superior (posiciones 12-23)
+        header_top = " ".join([f"{i:2d}" for i in range(12, 24)])
+        print(header_top)
+
+        # Calcular altura máxima parte superior
+        max_height_top = max(
+            (len(self.__posiciones__[i]) for i in range(12, 24)),
+            default=0
+        )
+
+        # Imprimir fichas parte superior
+        for height in range(max_height_top - 1, -1, -1):
+            line = ""
+            for i in range(12, 24):
+                if height < len(self.__posiciones__[i]):
+                    simbolo = self.__posiciones__[i][height].get_simbolo()
+                    line += f" {simbolo} "
+                else:
+                    line += "   "
+            print(line)
+
+        print("-" * 50)
+        print()
+
+        # Calcular altura máxima parte inferior
+        max_height_bottom = max(
+            (len(self.__posiciones__[i]) for i in range(12)),
+            default=0
+        )
+
+        # Imprimir fichas parte inferior
+        for height in range(max_height_bottom - 1, -1, -1):
+            line = []
+            for i in range(11, -1, -1):
+                if height < len(self.__posiciones__[i]):
+                    simbolo = self.__posiciones__[i][height].get_simbolo()
+                    line.append(f" {simbolo} ")
+                else:
+                    line.append("   ")
+            print("".join(line))
+
+        # Header inferior (posiciones 11-0)
+        header_bottom = " ".join([f"{i:2d}" for i in range(11, -1, -1)])
+        print(header_bottom)
+
+        print("-" * 50)
+        print()
+
+        fuera_p1 = self.__fuera__['player1']
+        fuera_p2 = self.__fuera__['player2']
+        print(f"FUERA P1: {fuera_p1} fichas | FUERA P2: {fuera_p2} fichas")
+        print("="*60)
+        return estado
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
         """
         Mueve fichas según los movimientos dados y valida cada uno.
