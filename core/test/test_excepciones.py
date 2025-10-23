@@ -6,15 +6,21 @@ import unittest
 from core.clases.excepciones import (
     ExcepcionSalirDelJuego,
     ErrorBackgammon,
+    ErrorJuego,
     JuegoNoInicializadoError,
     TurnoJugadorInvalidoError,
     JuegoYaFinalizadoError,
     MovimientoInvalidoError,
     SinMovimientosDisponiblesError,
+    ErrorTablero,
     PuntoInvalidoError,
     ComerMultipleFichasError,
     SacarFueraDesdePosicionInvalidaError,
     MovimientoMalFormadoError,
+    FichasEnBarError,
+    BearingOffNoPermitidoError,
+    PosicionBloqueadaError,
+    ErrorDados,
     DadosNoLanzadosError,
     ValorDadoInvalidoError
 )
@@ -36,6 +42,20 @@ class TestErrorBackgammon(unittest.TestCase):
         """Verifica que se pueda lanzar y capturar la excepción base."""
         with self.assertRaises(ErrorBackgammon):
             raise ErrorBackgammon("Error genérico de Backgammon")
+
+
+class TestErrorJuegoBase(unittest.TestCase):
+    """Pruebas para la excepción base ErrorJuego."""
+
+    def test_error_juego_se_puede_lanzar(self):
+        """Verifica que se pueda lanzar y capturar la excepción base ErrorJuego."""
+        with self.assertRaises(ErrorJuego):
+            raise ErrorJuego("Error de juego genérico")
+
+    def test_jerarquia_juego_no_inicializado(self):
+        """Verifica que JuegoNoInicializadoError hereda de ErrorJuego."""
+        with self.assertRaises(ErrorJuego):
+            raise JuegoNoInicializadoError("Test herencia")
 
 
 class TestErrorJuego(unittest.TestCase):
@@ -67,6 +87,20 @@ class TestErrorJuego(unittest.TestCase):
             raise SinMovimientosDisponiblesError("No hay movimientos disponibles")
 
 
+class TestErrorTableroBase(unittest.TestCase):
+    """Pruebas para la excepción base ErrorTablero."""
+
+    def test_error_tablero_base(self):
+        """Verifica que ErrorTablero se puede lanzar."""
+        with self.assertRaises(ErrorTablero):
+            raise ErrorTablero("Error de tablero genérico")
+
+    def test_jerarquia_punto_invalido(self):
+        """Verifica que PuntoInvalidoError hereda de ErrorTablero."""
+        with self.assertRaises(ErrorTablero):
+            raise PuntoInvalidoError("Test herencia")
+
+
 class TestErrorTablero(unittest.TestCase):
     """Pruebas para las excepciones relacionadas con el tablero."""
 
@@ -92,6 +126,35 @@ class TestErrorTablero(unittest.TestCase):
         with self.assertRaises(MovimientoMalFormadoError):
             raise MovimientoMalFormadoError("Formato de movimiento inválido")
 
+    def test_fichas_en_bar_error(self):
+        """Verifica que FichasEnBarError funcione correctamente."""
+        with self.assertRaises(FichasEnBarError):
+            raise FichasEnBarError("Debe mover fichas del bar primero")
+
+    def test_bearing_off_no_permitido_error(self):
+        """Verifica que BearingOffNoPermitidoError funcione correctamente."""
+        with self.assertRaises(BearingOffNoPermitidoError):
+            raise BearingOffNoPermitidoError("Fichas fuera del cuadrante final")
+
+    def test_posicion_bloqueada_error(self):
+        """Verifica que PosicionBloqueadaError funcione correctamente."""
+        with self.assertRaises(PosicionBloqueadaError):
+            raise PosicionBloqueadaError("Posición bloqueada por el oponente")
+
+
+class TestErrorDadosBase(unittest.TestCase):
+    """Pruebas para la excepción base ErrorDados."""
+
+    def test_error_dados_base(self):
+        """Verifica que ErrorDados se puede lanzar."""
+        with self.assertRaises(ErrorDados):
+            raise ErrorDados("Error de dados genérico")
+
+    def test_jerarquia_dados_no_lanzados(self):
+        """Verifica que DadosNoLanzadosError hereda de ErrorDados."""
+        with self.assertRaises(ErrorDados):
+            raise DadosNoLanzadosError("Test herencia")
+
 
 class TestErrorDados(unittest.TestCase):
     """Pruebas para las excepciones relacionadas con los dados."""
@@ -105,5 +168,41 @@ class TestErrorDados(unittest.TestCase):
         """Verifica que ValorDadoInvalidoError funcione correctamente."""
         with self.assertRaises(ValorDadoInvalidoError):
             raise ValorDadoInvalidoError("Valor de dado fuera de rango")
+
+
+class TestJerarquiaExcepciones(unittest.TestCase):
+    """Pruebas para verificar la correcta jerarquía de excepciones."""
+
+    def test_todas_excepciones_juego_heredan_error_backgammon(self):
+        """Verifica que todas las excepciones de juego heredan de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise JuegoNoInicializadoError("Test")
+
+    def test_todas_excepciones_tablero_heredan_error_backgammon(self):
+        """Verifica que todas las excepciones de tablero heredan de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise PuntoInvalidoError("Test")
+
+    def test_todas_excepciones_dados_heredan_error_backgammon(self):
+        """Verifica que todas las excepciones de dados heredan de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise DadosNoLanzadosError("Test")
+
+    def test_error_juego_hereda_de_error_backgammon(self):
+        """Verifica que ErrorJuego hereda de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise ErrorJuego("Test")
+
+    def test_error_tablero_hereda_de_error_backgammon(self):
+        """Verifica que ErrorTablero hereda de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise ErrorTablero("Test")
+
+    def test_error_dados_hereda_de_error_backgammon(self):
+        """Verifica que ErrorDados hereda de ErrorBackgammon."""
+        with self.assertRaises(ErrorBackgammon):
+            raise ErrorDados("Test")
+
+
 if __name__ == "__main__":
     unittest.main()

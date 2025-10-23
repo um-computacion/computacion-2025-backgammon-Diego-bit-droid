@@ -25,4 +25,21 @@ def get_jugador_actual(self):
     elif self.__turno__ == 2:
         return self.__jugador2__
 
+# Solución a Errores de Pylint sin Modificar el Código
 
+## Prompt
+```
+core/clases/board.py:167:4: R0911: Too many return statements (8/6) (too-many-return-statements)
+core/clases/board.py:167:4: R0912: Too many branches (15/12) (too-many-branches)
+
+¿Cómo puedo solucionar estos errores?
+```
+
+## Respuesta
+
+Si no quieres modificar tu codigo, puedes desactivar la advertencia específicamente:
+```python
+# pylint: disable=too-many-return-statements,too-many-branches
+def metodo_complejo(self):
+    # tu código aquí
+    pass

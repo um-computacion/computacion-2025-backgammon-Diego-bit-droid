@@ -8,7 +8,7 @@ from core.clases.excepciones import (
     PuntoInvalidoError,
     MovimientoMalFormadoError
 )
-
+# pylint: disable=too-many-return-statements,too-many-branches
 class Board:
     """
     Representa el tablero de Backgammon con 24 posiciones,
@@ -41,12 +41,10 @@ class Board:
             list: lista de 24 pilas con fichas iniciales.
         """
         self.__posiciones__ = [[] for _ in range(24)]
-        # Player X (fichas en posiciones 0, 11, 16, 18)
         self.__posiciones__[0] = [Checker("X") for _ in range(2)]
         self.__posiciones__[11] = [Checker("X") for _ in range(5)]
         self.__posiciones__[16] = [Checker("X") for _ in range(3)]
         self.__posiciones__[18] = [Checker("X") for _ in range(5)]
-        # Player O (fichas en posiciones 23, 12, 7, 5)
         self.__posiciones__[23] = [Checker("O") for _ in range(2)]
         self.__posiciones__[12] = [Checker("O") for _ in range(5)]
         self.__posiciones__[7] = [Checker("O") for _ in range(3)]
@@ -61,7 +59,6 @@ class Board:
         Returns:
             dict: Estado completo del tablero con posiciones, bar y fuera
         """
-        # Obtener estado del tablero
         estado = self.get_tablero()
         print("="*60)
 
@@ -73,17 +70,14 @@ class Board:
         print("Posiciones 0-23:")
         print("-" * 50)
 
-        # Header superior (posiciones 12-23)
         header_top = " ".join([f"{i:2d}" for i in range(12, 24)])
         print(header_top)
 
-        # Calcular altura máxima parte superior
         max_height_top = max(
             (len(self.__posiciones__[i]) for i in range(12, 24)),
             default=0
         )
 
-        # Imprimir fichas parte superior
         for height in range(max_height_top - 1, -1, -1):
             line = ""
             for i in range(12, 24):
@@ -97,13 +91,11 @@ class Board:
         print("-" * 50)
         print()
 
-        # Calcular altura máxima parte inferior
         max_height_bottom = max(
             (len(self.__posiciones__[i]) for i in range(12)),
             default=0
         )
 
-        # Imprimir fichas parte inferior
         for height in range(max_height_bottom - 1, -1, -1):
             line = []
             for i in range(11, -1, -1):
@@ -114,7 +106,6 @@ class Board:
                     line.append("   ")
             print("".join(line))
 
-        # Header inferior (posiciones 11-0)
         header_bottom = " ".join([f"{i:2d}" for i in range(11, -1, -1)])
         print(header_bottom)
 
@@ -126,6 +117,7 @@ class Board:
         print(f"FUERA P1: {fuera_p1} fichas | FUERA P2: {fuera_p2} fichas")
         print("="*60)
         return estado
+
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
         """
         Mueve fichas según los movimientos dados y valida cada uno.
@@ -138,7 +130,6 @@ class Board:
         Returns:
             dict: diccionario con resultados, dados usados y log
         """
-        # Validar formato de movimientos
         if not isinstance(movimientos, list):
             raise MovimientoMalFormadoError(
                 "Los movimientos deben ser una lista de tuplas (desde, hasta)."
@@ -154,7 +145,6 @@ class Board:
         dados_usados = []
         log = []
 
-        # Procesar cada movimiento
         for desde, hasta in movimientos:
             movimiento_data = {
                 'desde': desde,
@@ -180,7 +170,7 @@ class Board:
 
         Args:
             movimiento_data: dict con claves 'desde', 'hasta', 'jugador',
-                           'dados_disponibles', 'dados_usados', 'log'
+                        'dados_disponibles', 'dados_usados', 'log'
 
         Returns:
             bool: True si el movimiento fue exitoso, False si no
@@ -193,48 +183,85 @@ class Board:
         log = movimiento_data['log']
         distancia = self.calcular_distancia(desde, hasta, jugador)
 
-        # Verificar si hay dado disponible
-        if distancia not in dados_disponibles:
+        if desde != "bar" and self.__bar__[jugador.get_nombre()] > 0:
             log.append(
-                f"No se puede usar dado {distancia} "
-                f"para mover de {desde} a {hasta}."
+                f"Debes primero sacar tus {self.__bar__[jugador.get_nombre()]} "
+                f"ficha(s) del bar antes de mover otras fichas."
             )
             return False
 
-        # Validar movimiento
+        if distancia not in dados_disponibles:
+            if jugador.get_ficha() == "X":
+                if distancia < 0:
+                    log.append(
+                        f"Movimiento inválido: intentas moverte "
+                        f"{abs(distancia)} posiciones hacia atrás, "
+                        f"pero como jugador X debes moverte hacia adelante "
+                        f"(de 0 a 23). "
+                        f"Dados disponibles: {dados_disponibles}"
+                    )
+                else:
+                    log.append(
+                        f"Movimiento de {desde} a {hasta} requiere dado de "
+                        f"valor {distancia}, "
+                        f"pero solo tienes disponibles: {dados_disponibles}"
+                    )
+            else:
+                if distancia < 0:
+                    log.append(
+                        f"Movimiento inválido: intentas moverte "
+                        f"{abs(distancia)} posiciones hacia adelante, "
+                        f"pero como jugador O debes moverte hacia atrás "
+                        f"(de 23 a 0). "
+                        f"Dados disponibles: {dados_disponibles}"
+                    )
+                else:
+                    log.append(
+                        f"Movimiento de {desde} a {hasta} requiere dado de "
+                        f"valor {distancia}, "
+                        f"pero solo tienes disponibles: {dados_disponibles}"
+                    )
+            return False
+
         try:
             if not self.validar_movimiento(desde, hasta, jugador):
                 log.append(
-                    f"Movimiento inválido de {desde} a {hasta} "
-                    f"para jugador {jugador.get_ficha()}."
+                    f"No hay fichas en la posición {desde} o no te pertenecen."
                 )
                 return False
         except (MovimientoInvalidoError, PuntoInvalidoError) as error:
             log.append(str(error))
             return False
 
-        # Verificar si puede comer fichas múltiples
         if isinstance(hasta, int):
             pila_destino = self.__posiciones__[hasta]
             if pila_destino and \
-               pila_destino[-1].get_simbolo() != jugador.get_ficha():
+            pila_destino[-1].get_simbolo() != jugador.get_ficha():
                 if len(pila_destino) > 1:
                     log.append(
-                        f"Movimiento inválido: no se puede comer "
-                        f"múltiples fichas enemigas en {hasta}."
+                        f"No se puede mover a {hasta}: posición bloqueada con "
+                        f"{len(pila_destino)} fichas enemigas. "
+                        f"Solo puedes comer una ficha enemiga solitaria."
                     )
                     return False
 
-        # Verificar bearing off
         if hasta == "fuera":
-            if not self.esta_en_cuadrante_final(desde, jugador):
+            if not self.puede_sacar(jugador):
                 log.append(
-                    f"No se puede usar dado para sacar ficha desde {desde}, "
-                    f"fuera del cuadrante final."
+                    f"No puedes sacar fichas todavía. "
+                    f"Primero debes llevar todas tus fichas al cuadrante final "
+                    f"({'18-23' if jugador.get_nombre() == 'player1' else '0-5'})."
                 )
                 return False
 
-        # Ejecutar movimiento
+            if not self.esta_en_cuadrante_final(desde, jugador):
+                log.append(
+                    f"No se puede sacar ficha desde {desde}. "
+                    f"Solo puedes sacar fichas del cuadrante final "
+                    f"({'18-23' if jugador.get_nombre() == 'player1' else '0-5'})."
+                )
+                return False
+
         return self._ejecutar_movimiento({
             'desde': desde,
             'hasta': hasta,
@@ -265,7 +292,6 @@ class Board:
         log = movimiento_data['log']
         ficha_comida = False
 
-        # Intentar comer ficha enemiga
         try:
             if self.puede_comer(hasta, jugador):
                 self.__posiciones__[hasta].pop()
@@ -279,13 +305,11 @@ class Board:
             log.append(str(error))
             return False
 
-        # Mover ficha desde origen
         if desde == "bar":
             self.__bar__[jugador.get_nombre()] -= 1
         else:
             self.__posiciones__[desde].pop()
 
-        # Colocar ficha en destino
         if hasta == "fuera":
             self.__fuera__[jugador.get_nombre()] += 1
             log.append(
@@ -302,7 +326,6 @@ class Board:
                 mensaje += " Comió ficha enemiga."
             log.append(mensaje)
 
-        # Registrar dado usado
         dados_disponibles.remove(distancia)
         dados_usados.append(distancia)
         return True
@@ -335,11 +358,9 @@ class Board:
         Returns:
             bool: True si es válido, False si no.
         """
-        # Validar rango de 'desde'
         if isinstance(desde, int) and not 0 <= desde < 24:
             raise PuntoInvalidoError(f"Posición 'desde' fuera de rango: {desde}")
 
-        # Validar movimiento desde bar
         if desde == "bar":
             if self.__bar__[jugador.get_nombre()] == 0:
                 raise MovimientoInvalidoError(
