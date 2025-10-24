@@ -26,12 +26,15 @@ class Player:
 
     def fichas_en_bar(self, board):
         """Devuelve cuántas fichas del jugador están en el bar."""
-        return board.get_bar(self.get_nombre())
+        # Player con ficha 'X' es player1, con ficha 'O' es player2
+        player_key = 'player1' if self.__ficha__ == 'X' else 'player2'
+        return board.get_bar(player_key)
 
     def fichas_sacadas(self, board):
         """Devuelve cuántas fichas del jugador fueron sacadas del juego."""
-        return board.get_fuera(self.get_nombre())
-
+        # Player con ficha 'X' es player1, con ficha 'O' es player2
+        player_key = 'player1' if self.__ficha__ == 'X' else 'player2'
+        return board.get_fuera(player_key)
     def estado_jugador(self, board):
         """Devuelve un resumen del estado actual del jugador."""
         en_tablero = self.fichas_en_tablero(board)
