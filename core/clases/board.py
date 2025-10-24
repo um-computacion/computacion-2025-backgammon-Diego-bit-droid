@@ -6,7 +6,7 @@ from core.clases.checker import Checker
 from core.clases.excepciones import (
     MovimientoInvalidoError,
     PuntoInvalidoError,
-    MovimientoMalFormadoError
+    MovimientoMalFormadoError,
 )
 # pylint: disable=too-many-return-statements,too-many-branches
 class Board:
@@ -183,6 +183,7 @@ class Board:
         log = movimiento_data['log']
         distancia = self.calcular_distancia(desde, hasta, jugador)
 
+        # Validar fichas en bar
         if desde != "bar" and self.__bar__[jugador.get_nombre()] > 0:
             log.append(
                 f"Debes primero sacar tus {self.__bar__[jugador.get_nombre()]} "
@@ -190,7 +191,9 @@ class Board:
             )
             return False
 
+        # Validar dado disponible
         if distancia not in dados_disponibles:
+            # Mensaje personalizado según dirección
             if jugador.get_ficha() == "X":
                 if distancia < 0:
                     log.append(
@@ -202,9 +205,8 @@ class Board:
                     )
                 else:
                     log.append(
-                        f"Movimiento de {desde} a {hasta} requiere dado de "
-                        f"valor {distancia}, "
-                        f"pero solo tienes disponibles: {dados_disponibles}"
+                        f"No hay dado con valor {distancia} disponible. "
+                        f"Dados disponibles: {dados_disponibles}"
                     )
             else:
                 if distancia < 0:
@@ -217,9 +219,8 @@ class Board:
                     )
                 else:
                     log.append(
-                        f"Movimiento de {desde} a {hasta} requiere dado de "
-                        f"valor {distancia}, "
-                        f"pero solo tienes disponibles: {dados_disponibles}"
+                        f"No hay dado con valor {distancia} disponible. "
+                        f"Dados disponibles: {dados_disponibles}"
                     )
             return False
 
@@ -233,6 +234,7 @@ class Board:
             log.append(str(error))
             return False
 
+        # Validar posición bloqueada
         if isinstance(hasta, int):
             pila_destino = self.__posiciones__[hasta]
             if pila_destino and \
@@ -245,6 +247,7 @@ class Board:
                     )
                     return False
 
+        # Validar bearing off
         if hasta == "fuera":
             if not self.puede_sacar(jugador):
                 log.append(
