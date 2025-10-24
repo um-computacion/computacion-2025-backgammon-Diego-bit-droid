@@ -7,7 +7,6 @@ class MovimientoInvalidoError(Exception):
         super().__init__(mensaje)
         self.mensaje = mensaje
 
-
 def regla_bar(jugador, movimientos,_dados,board):
     """
     Valida que el jugador mueva primero las fichas del bar si las tiene.
@@ -27,7 +26,6 @@ def regla_bar(jugador, movimientos,_dados,board):
         raise MovimientoInvalidoError(
             f"{nombre} tiene fichas en el bar. Debe moverlas antes de usar otras."
         )
-
 
 def regla_salida_final(jugador, movimientos,_dados,board):
     """
