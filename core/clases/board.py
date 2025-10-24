@@ -193,7 +193,6 @@ class Board:
 
         # Validar dado disponible
         if distancia not in dados_disponibles:
-            # Mensaje personalizado según dirección
             if jugador.get_ficha() == "X":
                 if distancia < 0:
                     log.append(

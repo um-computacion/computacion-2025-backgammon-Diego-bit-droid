@@ -26,7 +26,7 @@ class TestReglasValidacion(unittest.TestCase):
     def test_regla_bar_lanza_excepcion_si_hay_fichas_en_bar(self):
         """Verifica que se lance excepción al mover fuera del bar teniendo fichas en él."""
         self.board.set_bar("player1", 2)
-        movimientos = [(5, 7)]  # Movimiento fuera del bar
+        movimientos = [(5, 7)]  
         dados = [2]
 
         with self.assertRaises(MovimientoInvalidoError) as contexto:
@@ -51,7 +51,7 @@ class TestReglasValidacion(unittest.TestCase):
 
     def test_regla_salida_final_lanza_excepcion_si_no_puede_sacar(self):
         """Verifica que se lance excepción al intentar sacar sin estar en cuadrante final."""
-        self.board.set_posiciones(3, [Checker("X")])  # fuera del cuadrante final
+        self.board.set_posiciones(3, [Checker("X")]) 
         movimientos = [(3, "fuera")]
         dados = [5]
 
@@ -62,10 +62,9 @@ class TestReglasValidacion(unittest.TestCase):
 
     def test_regla_salida_final_no_lanza_excepcion_si_puede_sacar(self):
         """Verifica que no se lance excepción al sacar fichas correctamente."""
-        # Vaciar todas las posiciones y dejar una ficha en el cuadrante final
         for i in range(24):
             self.board.set_posiciones(i, [])
-        self.board.set_posiciones(22, [Checker("X")])  # dentro del cuadrante final
+        self.board.set_posiciones(22, [Checker("X")])  
         movimientos = [(22, "fuera")]
         dados = [1]
 
