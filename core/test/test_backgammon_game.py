@@ -3,7 +3,6 @@ Pruebas unitarias para la clase BackgammonGame.
 Valida la lógica completa del controlador del juego de Backgammon.
 """
 import unittest
-from unittest.mock import patch
 from core.clases.backgammon_game import BackgammonGame
 from core.clases.excepciones import (
     JuegoNoInicializadoError,
@@ -11,6 +10,8 @@ from core.clases.excepciones import (
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
 )
+
+
 class TestBackgammonGame(unittest.TestCase):
     """Suite de pruebas para la clase BackgammonGame."""
     # pylint: disable=too-many-public-methods
@@ -327,25 +328,6 @@ class TestBackgammonGame(unittest.TestCase):
                 else:
                     self.assertEqual(movimientos, [d1, d2])
 
-    def test_mover_ficha_cambia_turno_automaticamente(self):
-        """Verifica que mover ficha cambia turno cuando se agotan movimientos."""
-        self.game.iniciar_partida()
-        turno_inicial = self.game.get_turno()
-
-        with patch.object(self.game.get_board(), 'mover_ficha') as mock_mover:
-            mock_mover.return_value = {
-                "resultados": [True],
-                "dados_usados": [3],
-                "dados_restantes": [4],
-                "log": ["Movimiento exitoso"]
-            }
-
-            self.game.__movimientos_restantes__ = 1
-            self.game.mover_ficha([(0, 3)], 3, 4)
-
-            turno_final = self.game.get_turno()
-            self.assertNotEqual(turno_inicial, turno_final)
-
     def test_varios_cambios_turno(self):
         """Verifica múltiples cambios de turno consecutivos."""
         self.game.iniciar_partida()
@@ -361,6 +343,165 @@ class TestBackgammonGame(unittest.TestCase):
         self.game.get_board().set_fuera("player1", 10)
         self.game.get_board().set_fuera("player2", 10)
         self.assertFalse(self.game.hay_ganador())
+
+    def test_movimiento_valido_simple(self):
+        """Test: movimiento válido con un solo dado."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 3)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertTrue(resultado["resultados"][0])
+        self.assertEqual(len(resultado["dados_usados"]), 1)
+        self.assertIn(3, resultado["dados_usados"])
+
+    def test_movimiento_valido_multiple(self):
+        """Test: movimientos válidos con ambos dados."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 3), (11, 13)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertTrue(all(resultado["resultados"]))
+        self.assertEqual(len(resultado["dados_usados"]), 2)
+
+    def test_sin_movimientos_restantes(self):
+        """Test: intento de mover cuando no hay movimientos disponibles."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 0
+        movimientos = [(0, 3)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertFalse(resultado["resultados"][0])
+        self.assertEqual(len(resultado["dados_usados"]), 0)
+        self.assertIn("No hay movimientos disponibles", resultado["log"][0])
+
+    def test_movimiento_invalido_distancia(self):
+        """Test: movimiento con distancia incorrecta."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 6)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertFalse(resultado["resultados"][0])
+        self.assertEqual(len(resultado["dados_usados"]), 0)
+
+    def test_movimiento_invalido_posicion_origen(self):
+        """Test: movimiento desde posición sin fichas del jugador."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(23, 20)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertFalse(resultado["resultados"][0])
+
+    def test_movimiento_con_dobles(self):
+        """Test: movimiento cuando salen dados dobles (4 movimientos)."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 4
+        movimientos = [(0, 3), (0, 3), (11, 14), (11, 14)]
+        resultado = self.game.mover_ficha(movimientos, 3, 3)
+
+        self.assertLessEqual(len(resultado["dados_usados"]), 4)
+        if len(resultado["dados_usados"]) > 0:
+            self.assertTrue(all(d == 3 for d in resultado["dados_usados"]))
+
+    def test_cambio_turno_despues_movimientos(self):
+        """Test: verifica que el turno cambia después de usar todos los movimientos."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        jugador_inicial = self.game.get_jugador_actual()
+
+        movimientos = [(0, 3), (11, 13)]
+        self.game.mover_ficha(movimientos, 3, 2)
+
+        jugador_final = self.game.get_jugador_actual()
+        self.assertNotEqual(jugador_inicial.get_nombre(), jugador_final.get_nombre())
+
+    def test_no_cambio_turno_movimientos_restantes(self):
+        """Test: el turno no cambia si quedan movimientos."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 3
+        jugador_inicial = self.game.get_jugador_actual()
+
+        movimientos = [(0, 3)]
+        self.game.mover_ficha(movimientos, 3, 2)
+
+        jugador_final = self.game.get_jugador_actual()
+        self.assertEqual(jugador_inicial.get_nombre(), jugador_final.get_nombre())
+
+    def test_movimientos_restantes_actualizados(self):
+        """Test: verifica que los movimientos restantes se actualizan correctamente."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 4
+        movimientos_iniciales = self.game.__movimientos_restantes__
+
+        movimientos = [(0, 3), (11, 13)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        movimientos_esperados = movimientos_iniciales - len(resultado["dados_usados"])
+        self.assertEqual(self.game.__movimientos_restantes__, movimientos_esperados)
+
+    def test_dados_restantes_correcto(self):
+        """Test: verifica que los dados restantes se calculan correctamente."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 3)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        if resultado["resultados"][0]:
+            self.assertEqual(len(resultado["dados_restantes"]), 1)
+
+    def test_log_generado_correctamente(self):
+        """Test: verifica que se genera log de los movimientos."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 3)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertIsInstance(resultado["log"], list)
+        self.assertGreater(len(resultado["log"]), 0)
+
+    def test_estructura_resultado(self):
+        """Test: verifica que el resultado tiene la estructura correcta."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 3)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertIn("resultados", resultado)
+        self.assertIn("dados_usados", resultado)
+        self.assertIn("dados_restantes", resultado)
+        self.assertIn("log", resultado)
+        self.assertEqual(len(resultado["resultados"]), len(movimientos))
+
+    def test_movimiento_hacia_atras_invalido(self):
+        """Test: no se puede mover hacia atrás."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(11, 8)]
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertFalse(resultado["resultados"][0])
+
+    def test_lista_vacia_movimientos(self):
+        """Test: lista vacía de movimientos."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = []
+        resultado = self.game.mover_ficha(movimientos, 3, 2)
+
+        self.assertEqual(len(resultado["resultados"]), 0)
+        self.assertEqual(len(resultado["dados_usados"]), 0)
+
+    def test_movimiento_secuencial_valido(self):
+        """Test: múltiples movimientos en secuencia."""
+        self.game.__turno__ = 1
+        self.game.__movimientos_restantes__ = 2
+        movimientos = [(0, 2), (2, 5)]
+        resultado = self.game.mover_ficha(movimientos, 2, 3)
+
+        self.assertEqual(len(resultado["resultados"]), 2)
 
 
 if __name__ == "__main__":

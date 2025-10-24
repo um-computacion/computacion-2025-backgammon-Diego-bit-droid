@@ -11,3 +11,5 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 - Todas las clases del proyecto fueron reestructuradas para cumplir con los estándares de estilo y calidad de Pylint, alcanzando una calificación de 10/10.
 ### Implementacion
 -Implementacion del cli
+-Implementacion de nuevas excepciones 
+-Implementacion de nuevos test

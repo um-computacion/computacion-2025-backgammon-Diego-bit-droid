@@ -51,6 +51,9 @@ class BearingOffNoPermitidoError(ErrorTablero):
 class PosicionBloqueadaError(ErrorTablero):
     """Se lanza cuando se intenta mover a una posición ocupada por 2+ fichas enemigas."""
 
+class MovimientoContraDireccionError(ErrorTablero):
+    """Se lanza cuando un jugador intenta moverse en dirección contraria."""
+
 # Errores a nivel de dados
 class ErrorDados(ErrorBackgammon):
     """Excepción base para errores relacionados con los dados."""
@@ -60,3 +63,23 @@ class DadosNoLanzadosError(ErrorDados):
 
 class ValorDadoInvalidoError(ErrorDados):
     """Se lanza cuando los dados muestran valores fuera del rango permitido (1–6)."""
+
+class DadoNoDisponibleError(ErrorDados):
+    """intenta usar un valor de dado que ya fue utilizado o no está disponible."""
+
+# Errores de validación de entrada
+class ErrorEntrada(ErrorBackgammon):
+    """Excepción base para errores de entrada del usuario."""
+
+class FormatoMovimientoInvalidoError(ErrorEntrada):
+    """Se lanza cuando el formato del movimiento no es correcto."""
+
+# Errores de jugador
+class ErrorJugador(ErrorBackgammon):
+    """Excepción base para errores relacionados con jugadores."""
+
+class JugadorNoEncontradoError(ErrorJugador):
+    """Se lanza cuando se busca un jugador que no existe."""
+
+class NombreJugadorInvalidoError(ErrorJugador):
+    """Se lanza cuando el nombre del jugador es inválido (vacío, duplicado)."""

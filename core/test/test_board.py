@@ -13,7 +13,6 @@ from core.clases.excepciones import (
 
 class TestBoard(unittest.TestCase):
     """Suite de pruebas para la clase Board."""
-    # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-public-methods, protected-access
 
     def setUp(self):
@@ -145,9 +144,7 @@ class TestBoard(unittest.TestCase):
 
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(
-            any("posición bloqueada" in msg or
-                "múltiples fichas enemigas" in msg or
-                "Solo puedes comer una ficha enemiga solitaria" in msg
+            any("No se puede mover a 3" in msg and "bloqueada" in msg
                 for msg in resultado["log"])
         )
 
@@ -225,7 +222,8 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(resultado["resultados"], [False])
         self.assertEqual(resultado["dados_usados"], [])
         self.assertTrue(
-            any("dado" in msg.lower() for msg in resultado["log"])
+            any("No hay dado con valor" in msg or "Dados disponibles" in msg
+                for msg in resultado["log"])
         )
 
     def test_sacar_fuera(self):
@@ -320,16 +318,18 @@ class TestBoard(unittest.TestCase):
         cantidad = self.board.get_fuera("player1")
 
         self.assertEqual(cantidad, 4)
+
     def test_movimiento_con_dado_incorrecto(self):
         """Verifica que no se pueda mover usando un dado no disponible."""
         self.board.set_posiciones(0, [Checker("X")])
         dados = [2]
         resultado = self.board.mover_ficha(
-            self.jugador1, [(0, 5)], dados  # distancia 5, dado 2
+            self.jugador1, [(0, 5)], dados
         )
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
-            any("requiere dado" in msg.lower() for msg in resultado["log"])
+            any("No hay dado con valor" in msg or "Dados disponibles" in msg
+                for msg in resultado["log"])
         )
 
     def test_movimiento_hacia_atras_invalido_x(self):
@@ -363,7 +363,8 @@ class TestBoard(unittest.TestCase):
         )
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
-            any("bloqueada" in msg.lower() for msg in resultado["log"])
+            any("No se puede mover a 5" in msg and "bloqueada" in msg
+                for msg in resultado["log"])
         )
 
     def test_error_puede_comer_fuera_de_rango(self):
