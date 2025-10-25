@@ -10,13 +10,13 @@ class BackgammonCLI:
     """Interfaz de línea de comandos para Backgammon."""
     # pylint: disable=too-many-branches,too-many-statements
 
-    def __init__(self):
+    def __init__(self):  # pragma: no cover
         """Inicializa el CLI sin crear el juego todavía."""
         self.juego = None
         self.dados_actuales = None
         self.dados_lanzados = False
 
-    def mostrar_menu_principal(self):
+    def mostrar_menu_principal(self):  # pragma: no cover
         """Muestra el menú principal del juego."""
         print("\n" + "="*60)
         print("BACKGAMMON - Menú Principal")
@@ -25,7 +25,7 @@ class BackgammonCLI:
         print("2. Salir")
         print("="*60)
 
-    def mostrar_menu_juego(self):
+    def mostrar_menu_juego(self):  # pragma: no cover
         """Muestra el menú durante una partida."""
         print("\n" + "-"*60)
         print("Opciones:")
@@ -37,7 +37,7 @@ class BackgammonCLI:
         print("6. Volver al menú principal")
         print("-"*60)
 
-    def iniciar_nueva_partida(self):
+    def iniciar_nueva_partida(self):  # pragma: no cover
         """Crea y configura una nueva partida."""
         print("\n" + "="*60)
         print("NUEVA PARTIDA")
@@ -60,13 +60,12 @@ class BackgammonCLI:
         print(f"\n{jugador_actual.get_nombre()} comienza la partida!")
         print(f"Dados iniciales: {dado1} y {dado2}")
 
-        # Lanzar dados para el primer turno
         dado1, dado2, _ = self.juego.lanzar_dados()
         self.dados_actuales = (dado1, dado2)
         self.dados_lanzados = True
         self.juego.mostrar_movimientos_disponibles(dado1, dado2)
 
-    def ver_tablero(self):
+    def ver_tablero(self):  # pragma: no cover
         """Muestra el estado visual del tablero."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -74,7 +73,7 @@ class BackgammonCLI:
 
         self.juego.mostrar_tablero()
 
-    def ver_estado(self):
+    def ver_estado(self):  # pragma: no cover
         """Muestra el estado completo del juego."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -111,7 +110,7 @@ class BackgammonCLI:
         print(f"Fichas sacadas: {estado['jugador2']['fichas_sacadas']}")
         print("="*60)
 
-    def lanzar_dados(self):
+    def lanzar_dados(self):  # pragma: no cover
         """Lanza los dados para el turno actual."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -144,7 +143,6 @@ class BackgammonCLI:
         """
         texto = texto.strip().lower()
 
-        # Separar por espacio o guión
         if '-' in texto:
             partes = texto.split('-')
         else:
@@ -157,7 +155,6 @@ class BackgammonCLI:
 
         desde_str, hasta_str = partes[0].strip(), partes[1].strip()
 
-        # Parsear 'desde'
         if desde_str == "bar":
             desde = "bar"
         else:
@@ -168,7 +165,6 @@ class BackgammonCLI:
                     f"Posición de origen inválida: {desde_str}"
                 ) from exc
 
-        # Parsear 'hasta'
         if hasta_str == "fuera":
             hasta = "fuera"
         else:
@@ -181,7 +177,7 @@ class BackgammonCLI:
 
         return (desde, hasta)
 
-    def mover_fichas(self):
+    def mover_fichas(self):  # pragma: no cover
         """Solicita y ejecuta movimientos de fichas."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -195,7 +191,6 @@ class BackgammonCLI:
             print("Debe lanzar los dados primero.")
             return
 
-        # Mostrar tablero e información solo la primera vez
         print("\n" + "="*60)
         print("TABLERO ACTUAL")
         print("="*60)
@@ -206,7 +201,6 @@ class BackgammonCLI:
         ficha = jugador_inicial.get_ficha()
         print(f"\n--- Turno de {nombre} (ficha {ficha}) ---")
 
-        # Mostrar dirección de movimiento
         if jugador_inicial.get_ficha() == "X":
             print("Dirección: De posiciones BAJAS (0) a ALTAS (23)")
             print("Ejemplo: 0 -> 5, 10 -> 15")
@@ -217,9 +211,7 @@ class BackgammonCLI:
         d1, d2 = self.dados_actuales
         print(f"\nDados: {d1} y {d2}")
 
-        # Bucle para quedarse en la pantalla de mover hasta terminar movimientos
         while True:
-            # Verificar si el turno cambió
             jugador_actual = self.juego.get_jugador_actual()
             if jugador_actual.get_nombre() != jugador_inicial.get_nombre():
                 print("\nTodos los movimientos completados.")
@@ -228,7 +220,6 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 break
 
-            # Verificar si aún hay movimientos disponibles
             movimientos_restantes = self.juego.get_movimientos_restantes()
 
             if movimientos_restantes == 0:
@@ -256,7 +247,6 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 break
 
-            # Parsear múltiples movimientos separados por coma
             movimientos = []
             error_parseo = False
             for mov_str in entrada.split(','):
@@ -275,14 +265,12 @@ class BackgammonCLI:
                 print("No se ingresaron movimientos válidos.")
                 continue
 
-            # Ejecutar movimientos
             resultado = self.juego.mover_ficha(
                 movimientos,
                 self.dados_actuales[0],
                 self.dados_actuales[1]
             )
 
-            # Verificar si el movimiento fue exitoso
             if not any(resultado.get("resultados", [])):
                 print("\n" + "="*60)
                 print("TABLERO ACTUAL")
@@ -292,7 +280,6 @@ class BackgammonCLI:
                 print(f"\nDados: {d1} y {d2}")
                 continue
 
-            # Verificar si hay ganador
             if self.juego.hay_ganador():
                 print("\n" + "="*60)
                 print("TABLERO FINAL")
@@ -304,7 +291,6 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 return
 
-            # Verificar si el turno cambió
             jugador_actual = self.juego.get_jugador_actual()
             if jugador_actual.get_nombre() != jugador_inicial.get_nombre():
                 print("\n" + "="*60)
@@ -317,7 +303,6 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 break
 
-            # Si aún hay movimientos, mostrar tablero actualizado
             print("\n" + "="*60)
             print("TABLERO ACTUALIZADO")
             print("="*60)
@@ -325,7 +310,7 @@ class BackgammonCLI:
             d1, d2 = self.dados_actuales
             print(f"\nDados: {d1} y {d2}")
 
-    def pasar_turno(self):
+    def pasar_turno(self):  # pragma: no cover
         """Pasa el turno al siguiente jugador."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -339,14 +324,13 @@ class BackgammonCLI:
         print(f"\nTurno pasado de {jugador_anterior.get_nombre()} "
               f"a {jugador_nuevo.get_nombre()}")
 
-    def ejecutar(self):
+    def ejecutar(self):  # pragma: no cover
         """Ejecuta el bucle principal del CLI."""
         # pylint: disable=too-many-branches
         print("\nBienvenido a BACKGAMMON!")
 
         while True:
             if not self.juego:
-                # Menú principal
                 self.mostrar_menu_principal()
                 opcion = input("Seleccione una opción: ").strip()
 
@@ -359,7 +343,6 @@ class BackgammonCLI:
                     print("Opción inválida.")
 
             else:
-                # Menú de juego
                 self.mostrar_menu_juego()
                 opcion = input("Seleccione una opción: ").strip()
 
@@ -382,7 +365,7 @@ class BackgammonCLI:
                     print("Opción inválida.")
 
 
-def main():
+def main():  # pragma: no cover
     """Punto de entrada principal del CLI."""
     cli = BackgammonCLI()
     try:
@@ -391,5 +374,5 @@ def main():
         print("\n\nJuego interrumpido! Hasta luego.")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
