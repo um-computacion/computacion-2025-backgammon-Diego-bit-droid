@@ -25,6 +25,18 @@ class Board:
         self.__bar__ = {'player1': 0, 'player2': 0}
         self.__fuera__ = {'player1': 0, 'player2': 0}
 
+    def _get_player_key(self, jugador):
+        """
+        Obtiene la clave del jugador para acceder a bar y fuera.
+
+        Args:
+            jugador: objeto Player
+
+        Returns:
+            str: 'player1' o 'player2'
+        """
+        return 'player1' if jugador.get_ficha() == 'X' else 'player2'
+
     def get_tablero(self):
         """Devuelve el estado actual del tablero."""
         return {
@@ -183,15 +195,14 @@ class Board:
         log = movimiento_data['log']
         distancia = self.calcular_distancia(desde, hasta, jugador)
 
-        # Validar fichas en bar
-        if desde != "bar" and self.__bar__[jugador.get_nombre()] > 0:
+        player_key = self._get_player_key(jugador)
+        if desde != "bar" and self.__bar__[player_key] > 0:
             log.append(
-                f"Debes primero sacar tus {self.__bar__[jugador.get_nombre()]} "
+                f"Debes primero sacar tus {self.__bar__[player_key]} "
                 f"ficha(s) del bar antes de mover otras fichas."
             )
             return False
 
-        # Validar dado disponible
         if distancia not in dados_disponibles:
             if jugador.get_ficha() == "X":
                 if distancia < 0:
@@ -233,7 +244,6 @@ class Board:
             log.append(str(error))
             return False
 
-        # Validar posición bloqueada
         if isinstance(hasta, int):
             pila_destino = self.__posiciones__[hasta]
             if pila_destino and \
@@ -246,13 +256,12 @@ class Board:
                     )
                     return False
 
-        # Validar bearing off
         if hasta == "fuera":
             if not self.puede_sacar(jugador):
                 log.append(
                     f"No puedes sacar fichas todavía. "
                     f"Primero debes llevar todas tus fichas al cuadrante final "
-                    f"({'18-23' if jugador.get_nombre() == 'player1' else '0-5'})."
+                    f"({'18-23' if jugador.get_ficha() == 'X' else '0-5'})."
                 )
                 return False
 
@@ -260,7 +269,7 @@ class Board:
                 log.append(
                     f"No se puede sacar ficha desde {desde}. "
                     f"Solo puedes sacar fichas del cuadrante final "
-                    f"({'18-23' if jugador.get_nombre() == 'player1' else '0-5'})."
+                    f"({'18-23' if jugador.get_ficha() == 'X' else '0-5'})."
                 )
                 return False
 
@@ -294,26 +303,25 @@ class Board:
         log = movimiento_data['log']
         ficha_comida = False
 
+        player_key = self._get_player_key(jugador)
+        oponente_key = 'player2' if player_key == 'player1' else 'player1'
+
         try:
             if self.puede_comer(hasta, jugador):
                 self.__posiciones__[hasta].pop()
-                oponente = (
-                    "player2" if jugador.get_nombre() == "player1"
-                    else "player1"
-                )
-                self.__bar__[oponente] += 1
+                self.__bar__[oponente_key] += 1
                 ficha_comida = True
         except PuntoInvalidoError as error:
             log.append(str(error))
             return False
 
         if desde == "bar":
-            self.__bar__[jugador.get_nombre()] -= 1
+            self.__bar__[player_key] -= 1
         else:
             self.__posiciones__[desde].pop()
 
         if hasta == "fuera":
-            self.__fuera__[jugador.get_nombre()] += 1
+            self.__fuera__[player_key] += 1
             log.append(
                 f"{jugador.get_ficha()} sacó ficha desde {desde} "
                 f"usando dado {distancia}."
@@ -340,13 +348,14 @@ class Board:
             int: distancia positiva.
         """
         if desde == "bar":
-            desde = 0 if jugador.get_ficha() == "X" else 23
+            desde = -1 if jugador.get_ficha() == "X" else 24
+
         if hasta == "fuera":
-            hasta = 23 if jugador.get_ficha() == "X" else 0
-        return (
-            hasta - desde if jugador.get_ficha() == "X"
-            else desde - hasta
-        )
+            if jugador.get_ficha() == "X":
+                return 24 - desde if isinstance(desde, int) else 0
+            return desde + 1 if isinstance(desde, int) else 0
+
+        return hasta - desde if jugador.get_ficha() == "X" else desde - hasta
 
     def validar_movimiento(self, desde, _hasta, jugador):
         """
@@ -354,7 +363,8 @@ class Board:
 
         Args:
             desde: posición origen (int o "bar")
-            _hasta: posición destino (no usado, reservado para futuras validaciones)
+            _hasta: posición destino (no usado, reservado para futuras
+                    validaciones)
             jugador: objeto Player que realiza el movimiento
 
         Returns:
@@ -363,8 +373,10 @@ class Board:
         if isinstance(desde, int) and not 0 <= desde < 24:
             raise PuntoInvalidoError(f"Posición 'desde' fuera de rango: {desde}")
 
+        player_key = self._get_player_key(jugador)
+
         if desde == "bar":
-            if self.__bar__[jugador.get_nombre()] == 0:
+            if self.__bar__[player_key] == 0:
                 raise MovimientoInvalidoError(
                     f"No hay fichas en el bar para {jugador.get_nombre()}."
                 )
@@ -429,7 +441,7 @@ class Board:
         """Verifica si una posición está en el cuadrante final del jugador."""
         if not isinstance(posicion, int):
             return False
-        if jugador.get_nombre() == "player1":
+        if jugador.get_ficha() == 'X':
             return 18 <= posicion <= 23
         return 0 <= posicion <= 5
 

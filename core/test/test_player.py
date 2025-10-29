@@ -15,7 +15,6 @@ class TestPlayer(unittest.TestCase):
         self.player1 = Player("player1", "X")
         self.player2 = Player("player2", "O")
 
-        # Configurar estado personalizado
         self.board.set_bar("player1", 2)
         self.board.set_fuera("player1", 3)
 
@@ -30,7 +29,7 @@ class TestPlayer(unittest.TestCase):
     def test_fichas_en_tablero(self):
         """Verifica el conteo de fichas del jugador en el tablero."""
         cantidad = self.player1.fichas_en_tablero(self.board)
-        self.assertEqual(cantidad, 15)  # 2+5+3+5 según preparar_tablero
+        self.assertEqual(cantidad, 15)
 
     def test_fichas_en_bar(self):
         """Verifica el conteo de fichas del jugador en la barra."""

@@ -4,17 +4,20 @@ class MovimientoInvalidoError(Exception):
     """Excepción lanzada cuando un movimiento no cumple con las reglas del juego."""
 
     def __init__(self, mensaje):
-        super().__init__(mensaje)
         self.mensaje = mensaje
 
-def regla_bar(jugador, movimientos,_dados,board):
+    def __str__(self):
+        """Retorna el mensaje de error como string."""
+        return self.mensaje
+
+def regla_bar(jugador, movimientos, _dados, board):
     """
     Valida que el jugador mueva primero las fichas del bar si las tiene.
 
     Args:
         jugador: instancia de Player.
         movimientos: lista de tuplas (desde, hasta).
-        dados: lista de dados disponibles (no se usa aquí).
+        _dados: lista de dados disponibles (no se usa aquí).
         board: instancia de Board.
 
     Raises:
@@ -27,14 +30,14 @@ def regla_bar(jugador, movimientos,_dados,board):
             f"{nombre} tiene fichas en el bar. Debe moverlas antes de usar otras."
         )
 
-def regla_salida_final(jugador, movimientos,_dados,board):
+def regla_salida_final(jugador, movimientos, _dados, board):
     """
     Valida que el jugador solo saque fichas si todas están en el cuadrante final.
 
     Args:
         jugador: instancia de Player.
         movimientos: lista de tuplas (desde, hasta).
-        dados: lista de dados disponibles (no se usa aquí).
+        _dados: lista de dados disponibles (no se usa aquí).
         board: instancia de Board.
 
     Raises:
