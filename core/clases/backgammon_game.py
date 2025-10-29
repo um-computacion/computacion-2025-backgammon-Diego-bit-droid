@@ -1,4 +1,4 @@
-"""Backgammon game logic module."""
+"""Backgammon game logic modulo """
 from core.clases.board import Board
 from core.clases.dice import Dice
 from core.clases.player import Player
@@ -11,7 +11,7 @@ from core.clases.excepciones import (
 )
 
 
-class BackgammonGame:  # pylint: disable=too-many-public-methods
+class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instance-attributes
     """Main Backgammon game controller class."""
 
     def __init__(self, jugador1, jugador2, reglas=None):
@@ -30,6 +30,8 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
         self.__jugador1__ = Player(nombre=jugador1, ficha='X')
         self.__jugador2__ = Player(nombre=jugador2, ficha='O')
         self.__reglas__ = reglas if reglas else []
+        self.__dados_disponibles__ = []
+        self.__valores_dados__ = (0, 0)
 
     def calcular_movimientos_totales(self, dado1, dado2):
         """
@@ -49,6 +51,15 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
             invalid = dado1 if not 1 <= dado1 <= 6 else dado2
             raise ValorDadoInvalidoError(invalid)
         return [dado1] * 4 if dado1 == dado2 else [dado1, dado2]
+
+    def get_dados_disponibles(self):
+        """
+        Devuelve la lista de dados que aún están disponibles para usar.
+
+        Returns:
+            list: valores de dados disponibles
+        """
+        return self.__dados_disponibles__.copy()
 
     def mostrar_movimientos_disponibles(self, dado1, dado2):
         """
@@ -126,12 +137,16 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
             raise JuegoNoInicializadoError()
         self.__turno__ = 2 if self.__turno__ == 1 else 1
         self.__movimientos_restantes__ = 0
+        self.__dados_disponibles__ = []
+        self.__valores_dados__ = (0, 0)
         return self.get_jugador_actual()
 
     def lanzar_dados(self):
         """Lanza los dados y actualiza movimientos disponibles."""
         dado1, dado2 = self.__dice__.lanzar_dados()
+        self.__valores_dados__ = (dado1, dado2)
         self.__movimientos_restantes__ = 4 if dado1 == dado2 else 2
+        self.__dados_disponibles__ = self.calcular_movimientos_totales(dado1, dado2)
         return dado1, dado2, self.__movimientos_restantes__
 
     def mover_ficha(self, movimientos, dado1, dado2):
@@ -156,7 +171,10 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
                 "log": ["No hay movimientos disponibles en este turno."]
             }
 
-        dados_disponibles = self.calcular_movimientos_totales(dado1, dado2)
+        if not self.__dados_disponibles__:
+            self.__dados_disponibles__ = self.calcular_movimientos_totales(dado1, dado2)
+
+        dados_disponibles = self.__dados_disponibles__.copy()
 
         try:
             for regla in self.__reglas__:
@@ -170,6 +188,10 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
             }
 
         resultado = self.__board__.mover_ficha(jugador, movimientos, dados_disponibles)
+
+        for dado_usado in resultado["dados_usados"]:
+            if dado_usado in self.__dados_disponibles__:
+                self.__dados_disponibles__.remove(dado_usado)
 
         self.__movimientos_restantes__ -= len(resultado["dados_usados"])
 
@@ -310,6 +332,7 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods
             "movimientos_restantes": self.__movimientos_restantes__,
             "jugador_actual": jugador_actual.get_nombre() if jugador_actual else None,
             "tablero": self.get_tablero(),
+            "dados_disponibles": self.__dados_disponibles__.copy(),
             "jugador1": {
                 "nombre": self.__jugador1__.get_nombre(),
                 "ficha": self.__jugador1__.get_ficha(),

@@ -1,3 +1,4 @@
+
 """
 Backgammon con Pygame - Versión Corregida
 Tablero con disposición correcta de puntos y fichas
@@ -157,6 +158,20 @@ class BackgammonPygame:
         """Detecta qué punto fue clickeado"""
         mx, my = pos
         
+        # Verificar zona de bear off (derecha del tablero)
+        bear_off_x = self.board_x + BOARD_WIDTH + 10
+        bear_off_width = 100
+        
+        # Bear off para jugador X( abajo) - fichas negras
+        if (bear_off_x <= mx <= bear_off_x + bear_off_width and
+            self.board_y + BOARD_HEIGHT // 2 <= my <= self.board_y + BOARD_HEIGHT):
+            return "bear_off_O"
+        
+        # Bear off para jugador 0 (arriba) - fichas blancas
+        if (bear_off_x <= mx <= bear_off_x + bear_off_width and
+            self.board_y <= my <= self.board_y + BOARD_HEIGHT // 2):
+            return "bear_off_X"
+        
         # Verificar bar
         bar_x = self.board_x + (BOARD_WIDTH - BAR_WIDTH) // 2
         if bar_x <= mx <= bar_x + BAR_WIDTH:
@@ -232,6 +247,15 @@ class BackgammonPygame:
     
     def try_move(self, origin, dest):
         try:
+            # Convertir bear_off a "fuera" que es lo que espera el juego
+            if dest == "bear_off_X" or dest == "bear_off_O":
+                dest = "fuera"
+            
+            # Si el origen es un string de bear_off, también convertirlo
+            if isinstance(origin, str) and origin.startswith("bear_off"):
+                self.show_message("No puedes mover desde Bear Off", 2000)
+                return
+            
             movimientos = [(origin, dest)]
             resultado = self.game.mover_ficha(
                 movimientos,
@@ -365,21 +389,21 @@ class BackgammonPygame:
         if self.selected_point == point_num:
             color = HIGHLIGHT
         
-        # Triángulo
-        if direction == 1:  # Apunta hacia abajo
+        # Triángulo - INVERTIDO: direction 1 apunta ARRIBA, -1 apunta ABAJO
+        if direction == 1:  # Superior - Apunta hacia ABAJO (hacia el centro)
             points = [
-                (x, y),
-                (x - POINT_WIDTH // 2, y + POINT_HEIGHT),
-                (x + POINT_WIDTH // 2, y + POINT_HEIGHT)
+                (x - POINT_WIDTH // 2, y),
+                (x + POINT_WIDTH // 2, y),
+                (x, y + POINT_HEIGHT)
             ]
-            num_y = y + POINT_HEIGHT + 15
-        else:  # Apunta hacia arriba
+            num_y = y - 15
+        else:  # Inferior - Apunta hacia ARRIBA (hacia el centro)
             points = [
-                (x, y),
-                (x - POINT_WIDTH // 2, y - POINT_HEIGHT),
-                (x + POINT_WIDTH // 2, y - POINT_HEIGHT)
+                (x - POINT_WIDTH // 2, y),
+                (x + POINT_WIDTH // 2, y),
+                (x, y - POINT_HEIGHT)
             ]
-            num_y = y - POINT_HEIGHT - 25
+            num_y = y + 25
         
         pygame.draw.polygon(self.screen, color, points)
         pygame.draw.polygon(self.screen, BLACK, points, 2)
@@ -466,6 +490,9 @@ class BackgammonPygame:
         self.draw_text_centered("BAR", bar_x + BAR_WIDTH // 2, 
                                self.board_y + BOARD_HEIGHT // 2, 
                                self.font_small, WHITE)
+        
+        # Zona de Bear Off (derecha del tablero)
+        self.draw_bear_off_zone()
     
     def draw_dice_face(self, x, y, value):
         """Dibuja un dado"""
@@ -484,6 +511,55 @@ class BackgammonPygame:
         
         for dx, dy in dot_positions[value]:
             pygame.draw.circle(self.screen, BLACK, (x + dx, y + dy), 4)
+    
+    def draw_bear_off_zone(self):
+        """Dibuja la zona de bear off (sacar fichas)"""
+        if not self.game:
+            return
+        
+        bear_off_x = self.board_x + BOARD_WIDTH + 10
+        bear_off_width = 100
+        
+        # Zona superior (Jugador O - Negras)
+        pygame.draw.rect(self.screen, DARK_BEIGE,
+                        (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5))
+        pygame.draw.rect(self.screen, BLACK,
+                        (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
+        
+        self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
+                               self.board_y + 30, self.font_tiny, WHITE)
+        
+        # Mostrar fichas sacadas del jugador O
+        estado = self.game.get_estado_juego()
+        if estado and 'jugador2' in estado:
+            fichas_out = estado['jugador2']['fichas_sacadas']
+            self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
+                                   self.board_y + 60, self.font_medium, BLACK)
+            # Dibujar algunas fichas negras
+            for i in range(min(fichas_out, 5)):
+                cy = self.board_y + 90 + (i * 35)
+                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'O')
+        
+        # Zona inferior (Jugador X - Blancas)
+        pygame.draw.rect(self.screen, LIGHT_BEIGE,
+                        (bear_off_x, self.board_y + BOARD_HEIGHT // 2 + 5, 
+                         bear_off_width, BOARD_HEIGHT // 2 - 5))
+        pygame.draw.rect(self.screen, BLACK,
+                        (bear_off_x, self.board_y + BOARD_HEIGHT // 2 + 5,
+                         bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
+        
+        self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
+                               self.board_y + BOARD_HEIGHT - 30, self.font_tiny, BLACK)
+        
+        # Mostrar fichas sacadas del jugador X
+        if estado and 'jugador1' in estado:
+            fichas_out = estado['jugador1']['fichas_sacadas']
+            self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
+                                   self.board_y + BOARD_HEIGHT - 60, self.font_medium, WHITE)
+            # Dibujar algunas fichas blancas
+            for i in range(min(fichas_out, 5)):
+                cy = self.board_y + BOARD_HEIGHT - 90 - (i * 35)
+                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'X')
     
     def draw_game_info(self):
         """Panel lateral de información"""
@@ -519,17 +595,16 @@ class BackgammonPygame:
             self.draw_text(f"Movimientos: {mov}", px, y, self.font_small, WHITE)
             y += 50
         
-        # Dados - mostrar solo si están lanzados
-        if self.dice_values and self.dice_rolled:
-            self.draw_text("Dados:", px, y, self.font_medium, WHITE)
+        # Dados - mostrar solo los disponibles usando get_dados_disponibles()
+        if self.dice_values and self.dice_rolled and self.game.get_movimientos_restantes() > 0:
+            self.draw_text("Dados disponibles:", px, y, self.font_medium, WHITE)
             y += 40
             
-            dados_disp = self.game.calcular_movimientos_totales(
-                self.dice_values[0], self.dice_values[1]
-            )
+            # Obtener dados disponibles del juego
+            dados_disponibles = self.game.get_dados_disponibles()
             
-            # Dibujar dados en una cuadrícula de 2x2
-            for i, val in enumerate(dados_disp[:4]):
+            # Dibujar dados disponibles
+            for i, val in enumerate(dados_disponibles[:4]):
                 col = i % 2
                 row = i // 2
                 dice_x = px + col * 70
@@ -547,6 +622,7 @@ class BackgammonPygame:
         
         self.buttons['menu'].rect.y = y
         self.buttons['menu'].draw(self.screen, self.font_small)
+        
         # Estadísticas
         y = HEIGHT - 220
         self.draw_text("Estadísticas:", px, y, self.font_medium, GOLD)

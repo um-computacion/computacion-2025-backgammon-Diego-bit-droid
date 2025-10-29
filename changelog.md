@@ -106,5 +106,5 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 ### Implementacion
 -Finalizacion del pygame
 -Creacion de justificacion
-
+-Nueva implementacion de dados usados en backgammon
 
