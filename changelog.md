@@ -101,6 +101,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 ### Implementacion
 -Implementacion de mock en los test de cli y board
 -Creacion parcial del pygame
+-validacion de movientos legales y disponibles
 ## [1.6.0] - 2025-10-29
 
 ### Implementacion
