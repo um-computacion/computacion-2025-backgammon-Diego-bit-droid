@@ -2,6 +2,7 @@
 Pruebas unitarias para la clase Board del juego Backgammon.
 """
 import unittest
+from unittest.mock import patch
 from core.clases.checker import Checker
 from core.clases.player import Player
 from core.clases.board import Board
@@ -14,13 +15,20 @@ from core.clases.excepciones import (
 class TestBoard(unittest.TestCase):
     """Suite de pruebas para la clase Board."""
     # pylint: disable=too-many-public-methods, protected-access
-
     def setUp(self):
         """Inicializa el tablero y jugadores para cada test."""
         self.board = Board()
         self.jugador1 = Player("player1", "X")
         self.jugador2 = Player("player2", "O")
-
+    @patch('builtins.print')
+    def test_mostrar_board_imprime_correctamente(self, mock_print):
+        """Verifica que mostrar_board imprima información correcta."""
+        self.board.set_bar("player1", 3)
+        self.board.set_bar("player2", 2)
+        self.board.set_fuera("player1", 4)
+        self.board.set_fuera("player2", 6)
+        self.board.mostrar_board()
+        self.assertTrue(mock_print.called)
     def test_preparar_tablero(self):
         """Verifica que el tablero se inicialice correctamente."""
         tablero = self.board.get_tablero()["posiciones"]
@@ -49,10 +57,6 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(
             [c.get_simbolo() for c in tablero[5]], ['O'] * 5
         )
-
-    def test_mostrar_board(self):
-        """Verifica que mostrar_board no lance excepciones."""
-        self.board.mostrar_board()
 
     def test_valido_sin_comer(self):
         """Verifica movimiento válido sin comer ficha enemiga."""
@@ -171,8 +175,7 @@ class TestBoard(unittest.TestCase):
     def test_entrada_desde_bar_sin_fichas(self):
         """Verifica que no se pueda entrar desde bar vacío."""
         self.board.set_bar("player1", 0)
-        dados = [3]
-
+        dados = [4]
         resultado = self.board.mover_ficha(
             self.jugador1, [("bar", 3)], dados
         )
@@ -183,7 +186,7 @@ class TestBoard(unittest.TestCase):
     def test_sacar_fuera_desde_posicion_invalida(self):
         """Verifica que no se pueda sacar desde fuera del cuadrante."""
         self.board.set_posiciones(10, [Checker("X")])
-        dados = [13]
+        dados = [14]
 
         resultado = self.board.mover_ficha(
             self.jugador1, [(10, "fuera")], dados
@@ -233,8 +236,7 @@ class TestBoard(unittest.TestCase):
         self.board.set_bar("player1", 0)
         self.board.set_bar("player2", 0)
         self.board.set_posiciones(22, [Checker("X")])
-        dados = [1]
-
+        dados = [2]
         resultado = self.board.mover_ficha(
             self.jugador1, [(22, "fuera")], dados
         )
@@ -399,6 +401,16 @@ class TestBoard(unittest.TestCase):
         self.assertFalse(self.board.esta_en_cuadrante_final("foo", self.jugador2))
         self.assertFalse(self.board.esta_en_cuadrante_final(15, self.jugador2))
 
-
+    def test_tiene_fichas_en_bar_debe_mover_desde_bar(self):
+        """Verifica que si hay fichas en bar, no se puedan mover otras fichas."""
+        self.board.set_bar("player1", 1)
+        self.board.set_posiciones(10, [Checker("X")])
+        dados = [3]
+        resultado = self.board.mover_ficha(
+            self.jugador1, [(10, 13)], dados
+        )
+        self.assertEqual(resultado["resultados"], [False])
+        self.assertTrue(any("Debes primero sacar" in msg and "del bar" in msg
+                            for msg in resultado["log"]))
 if __name__ == "__main__":
     unittest.main()

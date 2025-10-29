@@ -10,13 +10,13 @@ class BackgammonCLI:
     """Interfaz de línea de comandos para Backgammon."""
     # pylint: disable=too-many-branches,too-many-statements
 
-    def __init__(self):  # pragma: no cover
+    def __init__(self):
         """Inicializa el CLI sin crear el juego todavía."""
         self.juego = None
         self.dados_actuales = None
         self.dados_lanzados = False
 
-    def mostrar_menu_principal(self):  # pragma: no cover
+    def mostrar_menu_principal(self):
         """Muestra el menú principal del juego."""
         print("\n" + "="*60)
         print("BACKGAMMON - Menú Principal")
@@ -25,7 +25,7 @@ class BackgammonCLI:
         print("2. Salir")
         print("="*60)
 
-    def mostrar_menu_juego(self):  # pragma: no cover
+    def mostrar_menu_juego(self):
         """Muestra el menú durante una partida."""
         print("\n" + "-"*60)
         print("Opciones:")
@@ -33,16 +33,15 @@ class BackgammonCLI:
         print("2. Ver estado del juego")
         print("3. Lanzar dados")
         print("4. Mover fichas")
-        print("5. Pasar turno")
+        print("5. Verificar movimientos legales")
         print("6. Volver al menú principal")
         print("-"*60)
 
-    def iniciar_nueva_partida(self):  # pragma: no cover
+    def iniciar_nueva_partida(self):
         """Crea y configura una nueva partida."""
         print("\n" + "="*60)
         print("NUEVA PARTIDA")
         print("="*60)
-
         nombre1 = input("Nombre del Jugador 1 (fichas X): ").strip()
         if not nombre1:
             nombre1 = "player1"
@@ -65,7 +64,7 @@ class BackgammonCLI:
         self.dados_lanzados = True
         self.juego.mostrar_movimientos_disponibles(dado1, dado2)
 
-    def ver_tablero(self):  # pragma: no cover
+    def ver_tablero(self):
         """Muestra el estado visual del tablero."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -73,7 +72,7 @@ class BackgammonCLI:
 
         self.juego.mostrar_tablero()
 
-    def ver_estado(self):  # pragma: no cover
+    def ver_estado(self):
         """Muestra el estado completo del juego."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -110,7 +109,7 @@ class BackgammonCLI:
         print(f"Fichas sacadas: {estado['jugador2']['fichas_sacadas']}")
         print("="*60)
 
-    def lanzar_dados(self):  # pragma: no cover
+    def lanzar_dados(self):
         """Lanza los dados para el turno actual."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -118,7 +117,7 @@ class BackgammonCLI:
 
         if self.dados_lanzados:
             print("Los dados ya fueron lanzados en este turno.")
-            print("Complete sus movimientos o pase el turno.")
+            print("Complete sus movimientos")
             return
 
         jugador = self.juego.get_jugador_actual()
@@ -128,6 +127,42 @@ class BackgammonCLI:
 
         print(f"\n{jugador.get_nombre()} lanzó los dados: {dado1} y {dado2}")
         self.juego.mostrar_movimientos_disponibles(dado1, dado2)
+
+        tiene_movimientos = self.juego.tiene_movimientos_legales(
+            jugador, dado1, dado2
+        )
+
+        if not tiene_movimientos:
+            print("\n ADVERTENCIA: No hay movimientos legales disponibles.")
+            print("El turno será automáticamente pasado.")
+            self.pasar_turno()
+
+    def verificar_movimientos_legales(self):
+        """Verifica si el jugador actual tiene movimientos legales disponibles."""
+        if not self.juego:
+            print("No hay partida en curso.")
+            return
+        if not self.dados_actuales:
+            print("Debe lanzar los dados primero.")
+            return
+        jugador = self.juego.get_jugador_actual()
+        d1, d2 = self.dados_actuales
+        print("\n" + "="*60)
+        print("VERIFICACIÓN DE MOVIMIENTOS LEGALES")
+        print("="*60)
+        print(f"Jugador: {jugador.get_nombre()} (ficha {jugador.get_ficha()})")
+        print(f"Dados: {d1} y {d2}")
+        print("-"*60)
+        tiene_movimientos = self.juego.tiene_movimientos_legales(jugador, d1, d2)
+        if tiene_movimientos:
+            print("✓ HAY movimientos legales disponibles.")
+            print("  Puede realizar al menos un movimiento válido.")
+        else:
+            print("✗ NO HAY movimientos legales disponibles.")
+            print("  Todas las posiciones están bloqueadas o no hay jugadas válidas.")
+            print("  Considere pasar el turno (opción 5).")
+
+        print("="*60)
 
     def parsear_movimiento(self, texto):
         """
@@ -177,18 +212,59 @@ class BackgammonCLI:
 
         return (desde, hasta)
 
-    def mover_fichas(self):  # pragma: no cover
+    def _mostrar_info_turno(self, jugador):
+        """Muestra información del turno actual."""
+        print(f"\n--- Turno de {jugador.get_nombre()} (ficha {jugador.get_ficha()}) ---")
+
+        if jugador.get_ficha() == "X":
+            print("Dirección: De posiciones BAJAS (0) a ALTAS (23)")
+            print("Ejemplo: 0 -> 5, 10 -> 15")
+        else:
+            print("Dirección: De posiciones ALTAS (23) a BAJAS (0)")
+            print("Ejemplo: 23 -> 18, 15 -> 10")
+
+        print(f"\nDados: {self.dados_actuales[0]} y {self.dados_actuales[1]}")
+
+    def _mostrar_instrucciones(self):
+        """Muestra las instrucciones de formato de movimientos."""
+        print("\nFormatos válidos:")
+        print("  - Para mover: '10 15' o '10-15'")
+        print("  - Desde bar: 'bar 5' o 'bar-5'")
+        print("  - Sacar ficha: '20 fuera' o '20-fuera'")
+        print("  - Múltiples movimientos: separe con comas '10 15, 15 20'")
+
+    def _procesar_entrada_movimientos(self, entrada):
+        """Procesa la entrada del usuario y devuelve lista de movimientos."""
+        movimientos = []
+        for mov_str in entrada.split(','):
+            try:
+                movimiento = self.parsear_movimiento(mov_str)
+                movimientos.append(movimiento)
+            except ValueError as e:
+                print(f"Error al parsear '{mov_str}': {e}")
+                return None
+        return movimientos
+
+    def _finalizar_turno(self):
+        """Finaliza el turno actual y limpia los dados."""
+        print("\nTodos los movimientos completados.")
+        print("Cambiando de jugador...")
+        self.dados_actuales = None
+        self.dados_lanzados = False
+
+    def _mostrar_tablero_con_dados(self):
+        """Muestra el tablero actual con los dados."""
+        print("\n" + "="*60)
+        print("TABLERO ACTUAL")
+        print("="*60)
+        self.juego.mostrar_tablero()
+        print(f"\nDados: {self.dados_actuales[0]} y {self.dados_actuales[1]}")
+
+    def mover_fichas(self):
+        # pylint: disable=too-many-branches,too-many-statements
         """Solicita y ejecuta movimientos de fichas."""
-        if not self.juego:
-            print("No hay partida en curso.")
-            return
-
-        if not self.dados_actuales:
-            print("Debe lanzar los dados primero.")
-            return
-
-        if not self.dados_lanzados:
-            print("Debe lanzar los dados primero.")
+        if not self.juego or not self.dados_actuales or not self.dados_lanzados:
+            print("Debe lanzar los dados primero." if self.juego else "No hay partida en curso.")
             return
 
         print("\n" + "="*60)
@@ -197,68 +273,33 @@ class BackgammonCLI:
         self.juego.mostrar_tablero()
 
         jugador_inicial = self.juego.get_jugador_actual()
-        nombre = jugador_inicial.get_nombre()
-        ficha = jugador_inicial.get_ficha()
-        print(f"\n--- Turno de {nombre} (ficha {ficha}) ---")
+        self._mostrar_info_turno(jugador_inicial)
 
-        if jugador_inicial.get_ficha() == "X":
-            print("Dirección: De posiciones BAJAS (0) a ALTAS (23)")
-            print("Ejemplo: 0 -> 5, 10 -> 15")
-        else:
-            print("Dirección: De posiciones ALTAS (23) a BAJAS (0)")
-            print("Ejemplo: 23 -> 18, 15 -> 10")
-
-        d1, d2 = self.dados_actuales
-        print(f"\nDados: {d1} y {d2}")
+        if not self.juego.tiene_movimientos_legales(
+            jugador_inicial, self.dados_actuales[0], self.dados_actuales[1]
+        ):
+            print("\n No hay movimientos legales disponibles.")
+            print("Pasando automáticamente el turno...")
+            self.pasar_turno()
+            return
 
         while True:
-            jugador_actual = self.juego.get_jugador_actual()
-            if jugador_actual.get_nombre() != jugador_inicial.get_nombre():
-                print("\nTodos los movimientos completados.")
-                print("Cambiando de jugador...")
-                self.dados_actuales = None
-                self.dados_lanzados = False
+            if self.juego.get_jugador_actual().get_nombre() != jugador_inicial.get_nombre():
+                self._finalizar_turno()
                 break
 
-            movimientos_restantes = self.juego.get_movimientos_restantes()
-
-            if movimientos_restantes == 0:
-                print("\nTodos los movimientos completados.")
-                print("Cambiando de jugador...")
-                self.dados_actuales = None
-                self.dados_lanzados = False
+            if self.juego.get_movimientos_restantes() == 0:
+                self._finalizar_turno()
                 break
 
-            print(f"\nMovimientos restantes: {movimientos_restantes}")
+            print(f"\nMovimientos restantes: {self.juego.get_movimientos_restantes()}")
+            self._mostrar_instrucciones()
 
-            print("\nFormatos válidos:")
-            print("  - Para mover: '10 15' o '10-15'")
-            print("  - Desde bar: 'bar 5' o 'bar-5'")
-            print("  - Sacar ficha: '20 fuera' o '20-fuera'")
-            print("  - Múltiples movimientos: separe con comas '10 15, 15 20'")
-            print("  - Escriba 'pasar' para pasar turno")
+            movimientos = self._procesar_entrada_movimientos(
+                input("\nIngrese movimiento(s): ").strip()
+            )
 
-            entrada = input("\nIngrese movimiento(s): ").strip()
-
-            if entrada.lower() == 'pasar':
-                print("\nPasando turno...")
-                self.juego.cambiar_turno()
-                self.dados_actuales = None
-                self.dados_lanzados = False
-                break
-
-            movimientos = []
-            error_parseo = False
-            for mov_str in entrada.split(','):
-                try:
-                    movimiento = self.parsear_movimiento(mov_str)
-                    movimientos.append(movimiento)
-                except ValueError as e:
-                    print(f"Error al parsear '{mov_str}': {e}")
-                    error_parseo = True
-                    break
-
-            if error_parseo:
+            if movimientos is None:
                 continue
 
             if not movimientos:
@@ -266,18 +307,11 @@ class BackgammonCLI:
                 continue
 
             resultado = self.juego.mover_ficha(
-                movimientos,
-                self.dados_actuales[0],
-                self.dados_actuales[1]
+                movimientos, self.dados_actuales[0], self.dados_actuales[1]
             )
 
             if not any(resultado.get("resultados", [])):
-                print("\n" + "="*60)
-                print("TABLERO ACTUAL")
-                print("="*60)
-                self.juego.mostrar_tablero()
-                d1, d2 = self.dados_actuales
-                print(f"\nDados: {d1} y {d2}")
+                self._mostrar_tablero_con_dados()
                 continue
 
             if self.juego.hay_ganador():
@@ -291,26 +325,21 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 return
 
-            jugador_actual = self.juego.get_jugador_actual()
-            if jugador_actual.get_nombre() != jugador_inicial.get_nombre():
+            if self.juego.get_jugador_actual().get_nombre() != jugador_inicial.get_nombre():
                 print("\n" + "="*60)
                 print("TABLERO FINAL")
                 print("="*60)
                 self.juego.mostrar_tablero()
-                print("\nTodos los movimientos completados.")
-                print("Cambiando de jugador...")
-                self.dados_actuales = None
-                self.dados_lanzados = False
+                self._finalizar_turno()
                 break
 
             print("\n" + "="*60)
             print("TABLERO ACTUALIZADO")
             print("="*60)
             self.juego.mostrar_tablero()
-            d1, d2 = self.dados_actuales
-            print(f"\nDados: {d1} y {d2}")
+            print(f"\nDados: {self.dados_actuales[0]} y {self.dados_actuales[1]}")
 
-    def pasar_turno(self):  # pragma: no cover
+    def pasar_turno(self):
         """Pasa el turno al siguiente jugador."""
         if not self.juego:
             print("No hay partida en curso.")
@@ -324,9 +353,9 @@ class BackgammonCLI:
         print(f"\nTurno pasado de {jugador_anterior.get_nombre()} "
               f"a {jugador_nuevo.get_nombre()}")
 
-    def ejecutar(self):  # pragma: no cover
-        """Ejecuta el bucle principal del CLI."""
+    def ejecutar(self):
         # pylint: disable=too-many-branches
+        """Ejecuta el bucle principal del CLI."""
         print("\nBienvenido a BACKGAMMON!")
 
         while True:
@@ -355,7 +384,7 @@ class BackgammonCLI:
                 elif opcion == "4":
                     self.mover_fichas()
                 elif opcion == "5":
-                    self.pasar_turno()
+                    self.verificar_movimientos_legales()
                 elif opcion == "6":
                     print("\nVolviendo al menú principal...")
                     self.juego = None
@@ -365,7 +394,7 @@ class BackgammonCLI:
                     print("Opción inválida.")
 
 
-def main():  # pragma: no cover
+def main():
     """Punto de entrada principal del CLI."""
     cli = BackgammonCLI()
     try:
@@ -374,5 +403,5 @@ def main():  # pragma: no cover
         print("\n\nJuego interrumpido! Hasta luego.")
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     main()

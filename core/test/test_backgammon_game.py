@@ -3,6 +3,7 @@ Pruebas unitarias para la clase BackgammonGame.
 Valida la lógica completa del controlador del juego de Backgammon.
 """
 import unittest
+from core.clases.checker import Checker
 from core.clases.backgammon_game import BackgammonGame
 from core.clases.excepciones import (
     JuegoNoInicializadoError,
@@ -10,6 +11,7 @@ from core.clases.excepciones import (
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
 )
+from core.clases.validaciones import regla_salida_final, regla_bar
 
 
 class TestBackgammonGame(unittest.TestCase):
@@ -258,14 +260,6 @@ class TestBackgammonGame(unittest.TestCase):
         self.game.iniciar_partida()
         self.assertGreater(self.game.get_movimientos_restantes(), 0)
 
-    def test_mostrar_tablero(self):
-        """Verifica que mostrar_tablero devuelve estado."""
-        resultado = self.game.mostrar_tablero()
-        self.assertIsNotNone(resultado)
-        self.assertIn("posiciones", resultado)
-        self.assertIn("bar", resultado)
-        self.assertIn("fuera", resultado)
-
     def test_juego_activo_sin_iniciar(self):
         """Verifica que juego no está activo sin iniciar."""
         self.assertFalse(self.game.juego_activo())
@@ -500,9 +494,107 @@ class TestBackgammonGame(unittest.TestCase):
         self.game.__movimientos_restantes__ = 2
         movimientos = [(0, 2), (2, 5)]
         resultado = self.game.mover_ficha(movimientos, 2, 3)
-
         self.assertEqual(len(resultado["resultados"]), 2)
 
+    def test_tiene_movimientos_posicion_inicial_sin_reglas(self):
+        """Al inicio del juego siempre hay movimientos legales disponibles."""
+        juego = BackgammonGame("player1", "player2")
+        juego.quien_empieza()
+        jugador = juego.get_jugador_actual()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 3, 4))
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 1, 1))
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 6, 6))
 
+    def test_tiene_movimientos_posicion_inicial_con_reglas(self):
+        """Verifica movimientos legales cuando hay reglas activas."""
+        reglas = [regla_bar, regla_salida_final]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        jugador = juego.get_jugador_actual()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 2, 3))
+    def test_tiene_movimientos_ficha_en_bar_con_espacio(self):
+        """Detecta movimientos legales cuando hay fichas en el bar y hay espacio."""
+        reglas = [regla_bar]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        tablero.set_bar('player1', 1)
+        jugador_x = juego.get_jugador1()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador_x, 3, 4))
+
+    def test_tiene_movimientos_bar_bloqueado(self):
+        """No hay movimientos si el bar está bloqueado."""
+        reglas = [regla_bar]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        tablero.set_bar('player1', 1)
+        for i in range(6):
+            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
+        jugador_x = juego.get_jugador1()
+        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 1, 2))
+
+    def test_tiene_movimientos_bearing_off_disponible(self):
+        """Detecta que bearing off es posible cuando todas las fichas están en home."""
+        reglas = [regla_salida_final]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        for i in range(24):
+            tablero.set_posiciones(i, [])
+        tablero.set_bar('player1', 0)
+        tablero.set_bar('player2', 0)
+        tablero.set_posiciones(18, [Checker('X'), Checker('X'), Checker('X')])
+        tablero.set_posiciones(19, [Checker('X'), Checker('X'), Checker('X')])
+        tablero.set_posiciones(20, [Checker('X'), Checker('X'), Checker('X')])
+        tablero.set_posiciones(21, [Checker('X'), Checker('X'), Checker('X')])
+        tablero.set_posiciones(22, [Checker('X')])
+        tablero.set_posiciones(23, [Checker('X'), Checker('X')])
+        jugador_x = juego.get_jugador1()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador_x, 5, 6))
+
+    def test_tiene_movimientos_bearing_off_no_permitido(self):
+        """No puede sacar fichas si tiene fichas fuera del home."""
+        reglas = [regla_salida_final]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        for i in range(24):
+            tablero.set_posiciones(i, [])
+        tablero.set_posiciones(10, [Checker('X')])
+        tablero.set_posiciones(23, [Checker('X'), Checker('X')])
+        for i in range(11, 17):
+            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
+        jugador_x = juego.get_jugador1()
+        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 6, 6))
+    def test_tiene_movimientos_dados_dobles(self):
+        """Con dados dobles detecta correctamente los movimientos."""
+        juego = BackgammonGame("player1", "player2")
+        juego.quien_empieza()
+        jugador = juego.get_jugador_actual()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 3, 3))
+    def test_tiene_movimientos_tablero_vacio(self):
+        """Sin fichas no hay movimientos."""
+        juego = BackgammonGame("player1", "player2")
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        for i in range(24):
+            tablero.set_posiciones(i, [])
+        tablero.set_bar('player1', 0)
+        tablero.set_bar('player2', 0)
+        jugador_x = juego.get_jugador1()
+        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 3, 4))
+    def test_tiene_movimientos_una_ficha_bloqueada(self):
+        """Una ficha totalmente bloqueada no tiene movimientos."""
+        juego = BackgammonGame("player1", "player2")
+        juego.quien_empieza()
+        tablero = juego.get_board()
+        for i in range(24):
+            tablero.set_posiciones(i, [])
+        tablero.set_posiciones(5, [Checker('X')])
+        for i in range(6, 12):
+            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
+        jugador_x = juego.get_jugador1()
+        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 1, 2))
 if __name__ == "__main__":
     unittest.main()

@@ -71,5 +71,19 @@ class TestReglasValidacion(unittest.TestCase):
             self.fail(
                 "regla_salida_final lanzó excepción aunque el jugador podía sacar fichas"
             )
+    def test_movimiento_invalido_error_str(self):
+        """Verifica que __str__ retorna el mensaje correctamente."""
+        mensaje = "Este es un mensaje de error"
+        error = MovimientoInvalidoError(mensaje)
+        self.assertEqual(str(error), mensaje)
+        self.assertEqual(error.mensaje, mensaje)
+
+    def test_movimiento_invalido_error_raise(self):
+        """Verifica que la excepción se puede lanzar y capturar correctamente."""
+        mensaje = "Error de prueba"
+        with self.assertRaises(MovimientoInvalidoError) as context:
+            raise MovimientoInvalidoError(mensaje)
+        self.assertEqual(str(context.exception), mensaje)
+        self.assertEqual(context.exception.mensaje, mensaje)
 if __name__ == "__main__":
     unittest.main()
