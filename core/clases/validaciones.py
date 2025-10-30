@@ -4,9 +4,10 @@ class MovimientoInvalidoError(Exception):
     """Excepción lanzada cuando un movimiento no cumple con las reglas del juego."""
 
     def __init__(self, mensaje):
-        self.mensaje = mensaje
+        self.__mensaje__ =mensaje
 
     def __str__(self):
+        # pylint: disable=no-member
         """Retorna el mensaje de error como string."""
         return self.mensaje
 

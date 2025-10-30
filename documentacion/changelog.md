@@ -102,10 +102,12 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 -Implementacion de mock en los test de cli y board
 -Creacion parcial del pygame
 -validacion de movientos legales y disponibles
-## [1.6.0] - 2025-10-29
+## [1.6.0] - 2025-10-30
 
 ### Implementacion
 -Finalizacion del pygame
 -Creacion de justificacion
 -Nueva implementacion de dados usados en backgammon
+-Implementacion de nuevo metodos de verifcacion de movientos legales y de opciones en la partida 
+-Implementacion de nuevo metodo en backgammon para evitar el uso de logica en cli
 

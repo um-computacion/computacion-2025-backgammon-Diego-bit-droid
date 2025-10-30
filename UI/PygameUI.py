@@ -1,7 +1,6 @@
-
 """
-Backgammon con Pygame - Versión Corregida
-Tablero con disposición correcta de puntos y fichas
+Backgammon con Pygame - Versión Simple
+Solo interfaz visual, toda la lógica está en BackgammonGame
 """
 import pygame
 from core.clases.backgammon_game import BackgammonGame
@@ -25,11 +24,9 @@ BUTTON_COLOR = (100, 150, 200)
 BUTTON_HOVER = (130, 180, 230)
 GOLD = (255, 215, 0)
 GREEN = (50, 200, 50)
-GRAY = (128, 128, 128)
-LIGHT_GRAY = (200, 200, 200)
+RED = (200, 50, 50)
 
 # Dimensiones
-MARGIN = 50
 BOARD_WIDTH = 840
 BOARD_HEIGHT = 600
 POINT_WIDTH = 60
@@ -65,7 +62,7 @@ class Button:
 
 
 class BackgammonPygame:
-    """Juego principal"""
+    """Juego principal - SOLO INTERFAZ"""
     
     def __init__(self):
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -80,12 +77,12 @@ class BackgammonPygame:
         self.game = None
         self.state = "MENU"
         self.selected_point = None
-        self.dice_values = None
-        self.dice_rolled = False
-        self.winner = None
+        self.dados_actuales = None
+        self.dados_lanzados = False
         
         self.message = ""
         self.message_timer = 0
+        self.message_color = GOLD
         self.player1_name = ""
         self.player2_name = ""
         self.current_input = 1
@@ -94,7 +91,6 @@ class BackgammonPygame:
         self.buttons = self.create_buttons()
         self.dt = 0
         
-        # Calcular posición del tablero centrado
         self.board_x = (WIDTH - BOARD_WIDTH - 300) // 2
         self.board_y = (HEIGHT - BOARD_HEIGHT) // 2
     
@@ -106,9 +102,10 @@ class BackgammonPygame:
             'menu': Button(WIDTH - 280, 320, 220, 50, "Menu")
         }
     
-    def show_message(self, text, duration=3000):
+    def show_message(self, text, duration=3000, color=GOLD):
         self.message = text
         self.message_timer = duration
+        self.message_color = color
     
     def update_message_timer(self):
         if self.message_timer > 0:
@@ -118,36 +115,23 @@ class BackgammonPygame:
                 self.message = ""
     
     def get_point_position(self, point_num):
-        """
-        Calcula posición de un punto en el tablero.
-        Puntos 0-11: Parte inferior (jugador X)
-        Puntos 12-23: Parte superior (jugador O)
-        """
-        # Cuadrante en el tablero
+        """Calcula posición de un punto en el tablero"""
         if point_num < 6:
-            # Cuadrante inferior derecho (0-5)
-            # De derecha a izquierda: 0, 1, 2, 3, 4, 5
             x = self.board_x + BOARD_WIDTH - (point_num + 1) * POINT_WIDTH + POINT_WIDTH // 2
             y = self.board_y + BOARD_HEIGHT
             direction = -1
         elif point_num < 12:
-            # Cuadrante inferior izquierdo (6-11)
-            # De derecha a izquierda: 6, 7, 8, 9, 10, 11
-            offset_from_left = 11 - point_num  # 5, 4, 3, 2, 1, 0
+            offset_from_left = 11 - point_num
             x = self.board_x + offset_from_left * POINT_WIDTH + POINT_WIDTH // 2
             y = self.board_y + BOARD_HEIGHT
             direction = -1
         elif point_num < 18:
-            # Cuadrante superior izquierdo (12-17)
-            # De izquierda a derecha: 12, 13, 14, 15, 16, 17
-            offset = point_num - 12  # 0, 1, 2, 3, 4, 5
+            offset = point_num - 12
             x = self.board_x + offset * POINT_WIDTH + POINT_WIDTH // 2
             y = self.board_y
             direction = 1
         else:
-            # Cuadrante superior derecho (18-23)
-            # De izquierda a derecha: 18, 19, 20, 21, 22, 23
-            offset = point_num - 18  # 0, 1, 2, 3, 4, 5
+            offset = point_num - 18
             x = self.board_x + BOARD_WIDTH // 2 + BAR_WIDTH // 2 + offset * POINT_WIDTH + POINT_WIDTH // 2
             y = self.board_y
             direction = 1
@@ -158,80 +142,74 @@ class BackgammonPygame:
         """Detecta qué punto fue clickeado"""
         mx, my = pos
         
-        # Verificar zona de bear off (derecha del tablero)
         bear_off_x = self.board_x + BOARD_WIDTH + 10
         bear_off_width = 100
         
-        # Bear off para jugador X( abajo) - fichas negras
         if (bear_off_x <= mx <= bear_off_x + bear_off_width and
             self.board_y + BOARD_HEIGHT // 2 <= my <= self.board_y + BOARD_HEIGHT):
             return "bear_off_O"
         
-        # Bear off para jugador 0 (arriba) - fichas blancas
         if (bear_off_x <= mx <= bear_off_x + bear_off_width and
             self.board_y <= my <= self.board_y + BOARD_HEIGHT // 2):
             return "bear_off_X"
         
-        # Verificar bar
         bar_x = self.board_x + (BOARD_WIDTH - BAR_WIDTH) // 2
         if bar_x <= mx <= bar_x + BAR_WIDTH:
             if self.board_y <= my <= self.board_y + BOARD_HEIGHT:
                 return "bar"
         
-        # Verificar puntos
         for point_num in range(24):
             x, y, direction = self.get_point_position(point_num)
             
-            # Área del triángulo
-            if direction == 1:  # Superior
+            if direction == 1:
                 if (x - POINT_WIDTH//2 <= mx <= x + POINT_WIDTH//2 and
                     y <= my <= y + POINT_HEIGHT):
                     return point_num
-            else:  # Inferior
+            else:
                 if (x - POINT_WIDTH//2 <= mx <= x + POINT_WIDTH//2 and
                     y - POINT_HEIGHT <= my <= y):
                     return point_num
         
         return None
     
-    # ==================== LÓGICA ====================
+    # ==================== LÓGICA (DELEGADA A BACKGAMMONGAME) ====================
     
     def start_game(self):
+        """Inicia partida - USA BackgammonGame.iniciar_partida()"""
         name1 = self.player1_name.strip() or "Jugador 1"
         name2 = self.player2_name.strip() or "Jugador 2"
         
         self.game = BackgammonGame(name1, name2)
         self.game.quien_empieza()
+        d1, d2, _ = self.game.lanzar_dados()
         
         self.state = "GAME"
-        self.dice_rolled = False
-        self.dice_values = None
+        self.dados_lanzados = True
+        self.dados_actuales = (d1, d2)
         self.selected_point = None
-        self.winner = None
         
         jugador = self.game.get_jugador_actual()
-        self.show_message(f"{jugador.get_nombre()} comienza!")
+        self.show_message(f"{jugador.get_nombre()} comienza! Dados: {d1}, {d2}", 3000, GREEN)
     
     def roll_dice(self):
-        if not self.game or self.dice_rolled:
+        """Lanza dados - USA BackgammonGame.lanzar_dados()"""
+        if not self.game or self.dados_lanzados:
+            if self.dados_lanzados:
+                self.show_message("Ya lanzaste los dados", 2000, RED)
             return
         
         d1, d2, _ = self.game.lanzar_dados()
-        self.dice_values = [d1, d2]
-        self.dice_rolled = True
+        self.dados_actuales = (d1, d2)
+        self.dados_lanzados = True
         
-        jugador = self.game.get_jugador_actual()
-        
-        if not self.game.tiene_movimientos_legales(jugador, d1, d2):
-            self.show_message("Sin movimientos legales. Turno pasado.")
-            self.game.cambiar_turno()
-            self.dice_rolled = False
-            self.dice_values = None
-        else:
-            self.show_message(f"Dados: {d1}, {d2}")
+        dados_disponibles = self.game.get_dados_disponibles()
+        self.show_message(f"Dados: {d1}, {d2} | Disponibles: {dados_disponibles}", 3000, GREEN)
     
     def handle_board_click(self, pos):
-        if not self.game or not self.dice_rolled:
+        """Maneja clicks en el tablero"""
+        if not self.game or not self.dados_lanzados:
+            if not self.dados_lanzados:
+                self.show_message("Primero debes lanzar los dados", 2000, RED)
             return
         
         clicked = self.get_clicked_point(pos)
@@ -240,45 +218,52 @@ class BackgammonPygame:
         
         if self.selected_point is None:
             self.selected_point = clicked
-            self.show_message(f"Seleccionado: {clicked}", 2000)
+            self.show_message(f"Origen: {clicked}", 2000, GOLD)
         else:
             self.try_move(self.selected_point, clicked)
             self.selected_point = None
     
     def try_move(self, origin, dest):
-        try:
-            # Convertir bear_off a "fuera" que es lo que espera el juego
-            if dest == "bear_off_X" or dest == "bear_off_O":
-                dest = "fuera"
-            
-            # Si el origen es un string de bear_off, también convertirlo
-            if isinstance(origin, str) and origin.startswith("bear_off"):
-                self.show_message("No puedes mover desde Bear Off", 2000)
-                return
-            
-            movimientos = [(origin, dest)]
-            resultado = self.game.mover_ficha(
-                movimientos,
-                self.dice_values[0],
-                self.dice_values[1]
-            )
-            
-            if any(resultado['resultados']):
-                self.show_message("¡Movimiento exitoso!")
-                
-                if self.game.hay_ganador():
-                    estado = self.game.get_estado_juego()
-                    self.winner = estado['jugador_actual']
-                    self.state = "WINNER"
-                
-                if self.game.get_movimientos_restantes() == 0:
-                    self.dice_rolled = False
-                    self.dice_values = None
-            else:
-                msg = resultado['log'][0] if resultado['log'] else "Movimiento inválido"
-                self.show_message(msg, 3000)
-        except Exception as e:
-            self.show_message(f"Error: {str(e)}", 3000)
+        """Intenta mover - USA BackgammonGame.mover_ficha()"""
+        # Convertir bear_off a "fuera"
+        if dest == "bear_off_X" or dest == "bear_off_O":
+            dest = "fuera"
+        
+        if isinstance(origin, str) and origin.startswith("bear_off"):
+            self.show_message("No puedes mover desde Bear Off", 2000, RED)
+            return
+        
+        jugador_inicial = self.game.get_jugador_actual()
+        
+        # TODA LA LÓGICA está en BackgammonGame.mover_ficha()
+        resultado = self.game.mover_ficha(
+            [(origin, dest)],
+            self.dados_actuales[0],
+            self.dados_actuales[1]
+        )
+        
+        # Mostrar resultado
+        if any(resultado['resultados']):
+            msg = resultado['log'][0] if resultado['log'] else "¡Movimiento exitoso!"
+            self.show_message(msg, 2000, GREEN)
+        else:
+            msg = resultado['log'][0] if resultado['log'] else "Movimiento inválido"
+            self.show_message(msg, 3000, RED)
+        
+        # Verificar ganador - USA BackgammonGame.hay_ganador()
+        if self.game.hay_ganador():
+            self.state = "WINNER"
+            return
+        
+        # Verificar si cambió de turno
+        jugador_actual = self.game.get_jugador_actual()
+        if jugador_actual.get_nombre() != jugador_inicial.get_nombre():
+            self.dados_lanzados = False
+            self.dados_actuales = None
+            self.show_message(f"Turno de {jugador_actual.get_nombre()}", 3000, GREEN)
+        elif self.game.get_movimientos_restantes() == 0:
+            self.dados_lanzados = False
+            self.dados_actuales = None
     
     # ==================== EVENTOS ====================
     
@@ -383,21 +368,19 @@ class BackgammonPygame:
         """Dibuja un triángulo del tablero"""
         x, y, direction = self.get_point_position(point_num)
         
-        # Alternar colores
         color = LIGHT_BEIGE if point_num % 2 == 0 else DARK_BEIGE
         
         if self.selected_point == point_num:
             color = HIGHLIGHT
         
-        # Triángulo - INVERTIDO: direction 1 apunta ARRIBA, -1 apunta ABAJO
-        if direction == 1:  # Superior - Apunta hacia ABAJO (hacia el centro)
+        if direction == 1:
             points = [
                 (x - POINT_WIDTH // 2, y),
                 (x + POINT_WIDTH // 2, y),
                 (x, y + POINT_HEIGHT)
             ]
             num_y = y - 15
-        else:  # Inferior - Apunta hacia ARRIBA (hacia el centro)
+        else:
             points = [
                 (x - POINT_WIDTH // 2, y),
                 (x + POINT_WIDTH // 2, y),
@@ -407,8 +390,6 @@ class BackgammonPygame:
         
         pygame.draw.polygon(self.screen, color, points)
         pygame.draw.polygon(self.screen, BLACK, points, 2)
-        
-        # Número del punto
         self.draw_text_centered(str(point_num), x, num_y, self.font_tiny, WHITE)
     
     def draw_checker(self, x, y, symbol):
@@ -421,13 +402,12 @@ class BackgammonPygame:
             pygame.draw.circle(self.screen, WHITE, (int(x), int(y)), CHECKER_RADIUS, 3)
     
     def draw_checkers(self):
-        """Dibuja todas las fichas"""
+        """Dibuja todas las fichas - USA BackgammonGame.get_tablero()"""
         if not self.game:
             return
         
         board_state = self.game.get_tablero()
         
-        # Fichas en puntos
         for point_num, checkers in enumerate(board_state['posiciones']):
             if not checkers:
                 continue
@@ -441,34 +421,28 @@ class BackgammonPygame:
                 symbol = checker.get_simbolo() if hasattr(checker, 'get_simbolo') else str(checker)
                 self.draw_checker(x, cy, symbol)
             
-            # Contador si hay más de 6
             if len(checkers) > 6:
                 offset = (CHECKER_RADIUS * 2 + 4) * 6
                 cy = y + direction * (CHECKER_RADIUS + offset)
                 self.draw_text_centered(f"+{len(checkers) - 6}", x, cy, self.font_small, WHITE)
         
-        # Bar
         bar_x = self.board_x + (BOARD_WIDTH - BAR_WIDTH) // 2 + BAR_WIDTH // 2
         
-        # Player 1 (X) abajo
         for i in range(min(board_state['bar']['player1'], 5)):
             cy = self.board_y + BOARD_HEIGHT - 40 - (i * 44)
             self.draw_checker(bar_x, cy, 'X')
         
-        # Player 2 (O) arriba
         for i in range(min(board_state['bar']['player2'], 5)):
             cy = self.board_y + 40 + (i * 44)
             self.draw_checker(bar_x, cy, 'O')
     
     def draw_board(self):
         """Dibuja el tablero completo"""
-        # Fondo del tablero
         pygame.draw.rect(self.screen, WOOD_BROWN, 
                         (self.board_x, self.board_y, BOARD_WIDTH, BOARD_HEIGHT))
         pygame.draw.rect(self.screen, BLACK, 
                         (self.board_x, self.board_y, BOARD_WIDTH, BOARD_HEIGHT), 4)
         
-        # Bar central
         bar_x = self.board_x + (BOARD_WIDTH - BAR_WIDTH) // 2
         pygame.draw.rect(self.screen, DARK_BROWN, 
                         (bar_x, self.board_y, BAR_WIDTH, BOARD_HEIGHT))
@@ -479,19 +453,15 @@ class BackgammonPygame:
                         (bar_x + BAR_WIDTH, self.board_y), 
                         (bar_x + BAR_WIDTH, self.board_y + BOARD_HEIGHT), 3)
         
-        # Puntos
         for i in range(24):
             self.draw_point(i)
         
-        # Fichas
         self.draw_checkers()
         
-        # Texto "BAR"
         self.draw_text_centered("BAR", bar_x + BAR_WIDTH // 2, 
                                self.board_y + BOARD_HEIGHT // 2, 
                                self.font_small, WHITE)
         
-        # Zona de Bear Off (derecha del tablero)
         self.draw_bear_off_zone()
     
     def draw_dice_face(self, x, y, value):
@@ -513,7 +483,7 @@ class BackgammonPygame:
             pygame.draw.circle(self.screen, BLACK, (x + dx, y + dy), 4)
     
     def draw_bear_off_zone(self):
-        """Dibuja la zona de bear off (sacar fichas)"""
+        """Dibuja la zona de bear off - USA BackgammonGame.get_estado_juego()"""
         if not self.game:
             return
         
@@ -529,13 +499,11 @@ class BackgammonPygame:
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
                                self.board_y + 30, self.font_tiny, WHITE)
         
-        # Mostrar fichas sacadas del jugador O
         estado = self.game.get_estado_juego()
         if estado and 'jugador2' in estado:
             fichas_out = estado['jugador2']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
                                    self.board_y + 60, self.font_medium, BLACK)
-            # Dibujar algunas fichas negras
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + 90 + (i * 35)
                 self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'O')
@@ -551,18 +519,16 @@ class BackgammonPygame:
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
                                self.board_y + BOARD_HEIGHT - 30, self.font_tiny, BLACK)
         
-        # Mostrar fichas sacadas del jugador X
         if estado and 'jugador1' in estado:
             fichas_out = estado['jugador1']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
                                    self.board_y + BOARD_HEIGHT - 60, self.font_medium, WHITE)
-            # Dibujar algunas fichas blancas
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + BOARD_HEIGHT - 90 - (i * 35)
                 self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'X')
     
     def draw_game_info(self):
-        """Panel lateral de información"""
+        """Panel lateral de información - USA BackgammonGame.get_estado_juego()"""
         if not self.game:
             return
         
@@ -595,15 +561,13 @@ class BackgammonPygame:
             self.draw_text(f"Movimientos: {mov}", px, y, self.font_small, WHITE)
             y += 50
         
-        # Dados - mostrar solo los disponibles usando get_dados_disponibles()
-        if self.dice_values and self.dice_rolled and self.game.get_movimientos_restantes() > 0:
+        # Dados - USA BackgammonGame.get_dados_disponibles()
+        if self.dados_actuales and self.dados_lanzados and self.game.get_movimientos_restantes() > 0:
             self.draw_text("Dados disponibles:", px, y, self.font_medium, WHITE)
             y += 40
             
-            # Obtener dados disponibles del juego
             dados_disponibles = self.game.get_dados_disponibles()
             
-            # Dibujar dados disponibles
             for i, val in enumerate(dados_disponibles[:4]):
                 col = i % 2
                 row = i // 2
@@ -650,11 +614,31 @@ class BackgammonPygame:
     def draw_message_overlay(self):
         """Mensaje temporal"""
         if self.message and self.message_timer > 0:
-            s = pygame.Surface((700, 80))
-            s.set_alpha(220)
+            s = pygame.Surface((900, 100))
+            s.set_alpha(230)
             s.fill(BLACK)
-            self.screen.blit(s, (WIDTH//2 - 350, HEIGHT - 120))
-            self.draw_text_centered(self.message, WIDTH//2, HEIGHT - 80, self.font_medium, GOLD)
+            self.screen.blit(s, (WIDTH//2 - 450, HEIGHT - 130))
+            
+            # Dividir mensaje en líneas si es muy largo
+            words = self.message.split()
+            lines = []
+            current_line = []
+            
+            for word in words:
+                test_line = ' '.join(current_line + [word])
+                if len(test_line) > 60:
+                    lines.append(' '.join(current_line))
+                    current_line = [word]
+                else:
+                    current_line.append(word)
+            
+            if current_line:
+                lines.append(' '.join(current_line))
+            
+            # Dibujar líneas
+            for i, line in enumerate(lines[:2]):  # Máximo 2 líneas
+                self.draw_text_centered(line, WIDTH//2, HEIGHT - 95 + (i * 30), 
+                                       self.font_small, self.message_color)
     
     def draw_game(self):
         """Pantalla de juego"""
@@ -665,12 +649,14 @@ class BackgammonPygame:
         self.draw_message_overlay()
     
     def draw_winner(self):
-        """Pantalla de victoria"""
+        """Pantalla de victoria - USA BackgammonGame.get_estado_juego()"""
         self.screen.fill(DARK_BROWN)
         self.draw_text_centered("¡Juego Terminado!", WIDTH//2, 200, self.font_large, GOLD)
         
-        if self.winner:
-            self.draw_text_centered(f"¡{self.winner} ha ganado!", WIDTH//2, 300, self.font_medium, GREEN)
+        estado = self.game.get_estado_juego()
+        if estado and estado['jugador_actual']:
+            self.draw_text_centered(f"¡{estado['jugador_actual']} ha ganado!", 
+                                   WIDTH//2, 300, self.font_medium, GREEN)
         
         self.buttons['new_game'].draw(self.screen, self.font_medium)
         self.buttons['quit'].draw(self.screen, self.font_medium)

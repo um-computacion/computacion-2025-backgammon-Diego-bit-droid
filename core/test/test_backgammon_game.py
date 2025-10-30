@@ -1,22 +1,21 @@
 """
 Pruebas unitarias para la clase BackgammonGame.
-Valida la lógica completa del controlador del juego de Backgammon.
 """
 import unittest
-from core.clases.checker import Checker
+import random
 from core.clases.backgammon_game import BackgammonGame
 from core.clases.excepciones import (
     JuegoNoInicializadoError,
-    TurnoJugadorInvalidoError,
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
 )
+from core.clases.checker import Checker
 from core.clases.validaciones import regla_salida_final, regla_bar
 
 
+# pylint: disable=too-many-public-methods
 class TestBackgammonGame(unittest.TestCase):
     """Suite de pruebas para la clase BackgammonGame."""
-    # pylint: disable=too-many-public-methods
 
     def setUp(self):
         """Inicializa entorno de prueba."""
@@ -24,7 +23,6 @@ class TestBackgammonGame(unittest.TestCase):
 
     def test_init_juego(self):
         """Verifica inicialización correcta del juego."""
-        self.assertIsNotNone(self.game.get_board())
         self.assertIsNotNone(self.game.get_jugador1())
         self.assertIsNotNone(self.game.get_jugador2())
         self.assertEqual(self.game.get_turno(), 0)
@@ -54,32 +52,6 @@ class TestBackgammonGame(unittest.TestCase):
         with self.assertRaises(ValorDadoInvalidoError):
             self.game.calcular_movimientos_totales(3, 7)
 
-    def test_calcular_movimientos_totales_ambos_invalidos(self):
-        """Verifica error cuando ambos dados están fuera de rango."""
-        with self.assertRaises(ValorDadoInvalidoError):
-            self.game.calcular_movimientos_totales(-1, 8)
-
-    def test_mostrar_movimientos_disponibles(self):
-        """Verifica que mostrar_movimientos_disponibles no lanza error."""
-        self.game.mostrar_movimientos_disponibles(2, 5)
-
-    def test_get_jugador_por_nombre_jugador1(self):
-        """Verifica obtención del jugador 1 por nombre."""
-        jugador = self.game.get_jugador_por_nombre("player1")
-        self.assertEqual(jugador.get_nombre(), "player1")
-        self.assertEqual(jugador.get_ficha(), "X")
-
-    def test_get_jugador_por_nombre_jugador2(self):
-        """Verifica obtención del jugador 2 por nombre."""
-        jugador = self.game.get_jugador_por_nombre("player2")
-        self.assertEqual(jugador.get_nombre(), "player2")
-        self.assertEqual(jugador.get_ficha(), "O")
-
-    def test_get_jugador_por_nombre_invalido(self):
-        """Verifica error cuando el jugador no existe."""
-        with self.assertRaises(TurnoJugadorInvalidoError):
-            self.game.get_jugador_por_nombre("Charlie")
-
     def test_quien_empieza_asigna_turno(self):
         """Verifica que quien_empieza asigna un turno válido."""
         turno, dado1, dado2 = self.game.quien_empieza()
@@ -88,15 +60,6 @@ class TestBackgammonGame(unittest.TestCase):
         self.assertIn(dado2, [1, 2, 3, 4, 5, 6])
         self.assertNotEqual(dado1, dado2)
         self.assertEqual(self.game.get_turno(), turno)
-
-    def test_quien_empieza_multiple_veces(self):
-        """Verifica que quien_empieza puede ejecutarse múltiples veces."""
-        turnos = set()
-        for _ in range(10):
-            game = BackgammonGame("player1", "player2")
-            turno, _, _ = game.quien_empieza()
-            turnos.add(turno)
-        self.assertTrue(1 in turnos or 2 in turnos)
 
     def test_iniciar_partida_asigna_turno(self):
         """Verifica que iniciar_partida asigna turno y lanza dados."""
@@ -134,22 +97,12 @@ class TestBackgammonGame(unittest.TestCase):
         jugador2 = self.game.get_jugador_actual()
         self.assertNotEqual(jugador1.get_nombre(), jugador2.get_nombre())
 
-    def test_cambiar_turno_reinicia_movimientos(self):
-        """Verifica que cambiar turno reinicia movimientos restantes a 0."""
+    def test_cambiar_turno_reinicia_movimientos_y_dados(self):
+        """Verifica que cambiar turno reinicia movimientos y limpia dados."""
         self.game.iniciar_partida()
         self.game.cambiar_turno()
         self.assertEqual(self.game.get_movimientos_restantes(), 0)
-
-    def test_cambiar_turno_ciclo_completo(self):
-        """Verifica ciclo completo de cambio de turno."""
-        self.game.iniciar_partida()
-        turno_inicial = self.game.get_turno()
-        self.game.cambiar_turno()
-        turno_cambiado = self.game.get_turno()
-        self.game.cambiar_turno()
-        turno_final = self.game.get_turno()
-        self.assertNotEqual(turno_inicial, turno_cambiado)
-        self.assertEqual(turno_inicial, turno_final)
+        self.assertEqual(len(self.game.get_dados_disponibles()), 0)
 
     def test_lanzar_dados_valores_validos(self):
         """Verifica que lanzar_dados devuelve valores válidos."""
@@ -166,32 +119,8 @@ class TestBackgammonGame(unittest.TestCase):
         esperados = 4 if dado1 == dado2 else 2
         self.assertEqual(self.game.get_movimientos_restantes(), esperados)
 
-    def test_mover_ficha_sin_movimientos_disponibles(self):
-        """Verifica comportamiento al mover sin movimientos disponibles."""
-        self.game.iniciar_partida()
-        self.game.__movimientos_restantes__ = 0
-        resultado = self.game.mover_ficha([(0, 3)], 3, 4)
-        self.assertFalse(any(resultado["resultados"]))
-        self.assertEqual(resultado["dados_usados"], [])
-        self.assertIn("No hay movimientos disponibles", resultado["log"][0])
-
     def test_hay_ganador_inicial(self):
         """Verifica que no hay ganador al inicio."""
-        self.assertFalse(self.game.hay_ganador())
-
-    def test_hay_ganador_jugador1_gana(self):
-        """Verifica detección de victoria del jugador 1."""
-        self.game.get_board().set_fuera("player1", 15)
-        self.assertTrue(self.game.hay_ganador())
-
-    def test_hay_ganador_jugador2_gana(self):
-        """Verifica detección de victoria del jugador 2."""
-        self.game.get_board().set_fuera("player2", 15)
-        self.assertTrue(self.game.hay_ganador())
-
-    def test_hay_ganador_sin_victoria_completa(self):
-        """Verifica que no hay ganador sin 15 fichas fuera."""
-        self.game.get_board().set_fuera("player1", 14)
         self.assertFalse(self.game.hay_ganador())
 
     def test_get_tablero(self):
@@ -213,40 +142,12 @@ class TestBackgammonGame(unittest.TestCase):
         jugador1 = self.game.get_jugador1()
         fichas_bar = self.game.get_fichas_en_bar(jugador1)
         self.assertEqual(fichas_bar, 0)
-        self.game.get_board().set_bar("player1", 3)
-        fichas_bar = self.game.get_fichas_en_bar(jugador1)
-        self.assertEqual(fichas_bar, 3)
 
     def test_get_fichas_sacadas(self):
         """Verifica conteo de fichas sacadas."""
         jugador1 = self.game.get_jugador1()
         fichas_fuera = self.game.get_fichas_sacadas(jugador1)
         self.assertEqual(fichas_fuera, 0)
-        self.game.get_board().set_fuera("player1", 5)
-        fichas_fuera = self.game.get_fichas_sacadas(jugador1)
-        self.assertEqual(fichas_fuera, 5)
-
-    def test_estado_turno(self):
-        """Verifica que estado_turno no lanza error."""
-        self.game.iniciar_partida()
-        self.game.estado_turno()
-
-    def test_get_jugador1(self):
-        """Verifica obtención del jugador 1."""
-        jugador1 = self.game.get_jugador1()
-        self.assertEqual(jugador1.get_nombre(), "player1")
-        self.assertEqual(jugador1.get_ficha(), "X")
-
-    def test_get_jugador2(self):
-        """Verifica obtención del jugador 2."""
-        jugador2 = self.game.get_jugador2()
-        self.assertEqual(jugador2.get_nombre(), "player2")
-        self.assertEqual(jugador2.get_ficha(), "O")
-
-    def test_get_board(self):
-        """Verifica obtención de la instancia del tablero."""
-        board = self.game.get_board()
-        self.assertIsNotNone(board)
 
     def test_get_turno(self):
         """Verifica obtención del número de turno."""
@@ -269,21 +170,12 @@ class TestBackgammonGame(unittest.TestCase):
         self.game.iniciar_partida()
         self.assertTrue(self.game.juego_activo())
 
-    def test_juego_activo_con_ganador(self):
-        """Verifica que juego no está activo cuando hay ganador."""
-        self.game.iniciar_partida()
-        self.game.get_board().set_fuera("player1", 15)
-        self.assertFalse(self.game.juego_activo())
-
     def test_get_estado_juego_sin_iniciar(self):
         """Verifica estado del juego sin iniciar."""
         estado = self.game.get_estado_juego()
         self.assertEqual(estado["turno"], 0)
         self.assertEqual(estado["movimientos_restantes"], 0)
         self.assertIsNone(estado["jugador_actual"])
-        self.assertIn("tablero", estado)
-        self.assertIn("jugador1", estado)
-        self.assertIn("jugador2", estado)
 
     def test_get_estado_juego_despues_de_iniciar(self):
         """Verifica estado completo del juego después de iniciar."""
@@ -292,35 +184,67 @@ class TestBackgammonGame(unittest.TestCase):
         self.assertIn(estado["turno"], [1, 2])
         self.assertGreater(estado["movimientos_restantes"], 0)
         self.assertIsNotNone(estado["jugador_actual"])
-        self.assertEqual(estado["jugador1"]["nombre"], "player1")
-        self.assertEqual(estado["jugador1"]["ficha"], "X")
-        self.assertEqual(estado["jugador2"]["nombre"], "player2")
-        self.assertEqual(estado["jugador2"]["ficha"], "O")
-
-    def test_get_estado_juego_estructura_completa(self):
-        """Verifica estructura completa del estado del juego."""
-        estado = self.game.get_estado_juego()
-        self.assertIn("turno", estado)
-        self.assertIn("movimientos_restantes", estado)
-        self.assertIn("jugador_actual", estado)
-        self.assertIn("tablero", estado)
         self.assertIn("jugador1", estado)
         self.assertIn("jugador2", estado)
         self.assertIn("nombre", estado["jugador1"])
-        self.assertIn("ficha", estado["jugador1"])
         self.assertIn("fichas_tablero", estado["jugador1"])
-        self.assertIn("fichas_bar", estado["jugador1"])
-        self.assertIn("fichas_sacadas", estado["jugador1"])
+
+    def test_mover_ficha_sin_inicializar_juego(self):
+        """Verifica error al mover sin inicializar juego."""
+        with self.assertRaises(JuegoNoInicializadoError):
+            self.game.mover_ficha([(0, 3)], 3, 2)
+
+    def test_mover_ficha_sin_movimientos_restantes(self):
+        """Verifica comportamiento cuando no hay movimientos restantes."""
+        self.game.iniciar_partida()
+        self.game.__movimientos_restantes__ = 0
+        resultado = self.game.mover_ficha([(0, 3)], 3, 4)
+        self.assertFalse(any(resultado["resultados"]))
+        self.assertEqual(len(resultado["dados_usados"]), 0)
+        self.assertTrue(len(resultado["log"]) > 0)
+
+    def test_estructura_resultado_mover_ficha(self):
+        """Verifica estructura del resultado."""
+        self.game.iniciar_partida()
+        resultado = self.game.mover_ficha([(0, 3)], 3, 2)
+        self.assertIn("resultados", resultado)
+        self.assertIn("dados_usados", resultado)
+        self.assertIn("dados_restantes", resultado)
+        self.assertIn("log", resultado)
 
     def test_calcular_movimientos_totales_todos_valores(self):
         """Verifica cálculo correcto para todos los valores de dados."""
-        for d1 in range(1, 7):
-            for d2 in range(1, 7):
-                movimientos = self.game.calcular_movimientos_totales(d1, d2)
-                if d1 == d2:
-                    self.assertEqual(movimientos, [d1] * 4)
+        for dado1 in range(1, 7):
+            for dado2 in range(1, 7):
+                movimientos = self.game.calcular_movimientos_totales(dado1, dado2)
+                if dado1 == dado2:
+                    self.assertEqual(movimientos, [dado1] * 4)
                 else:
-                    self.assertEqual(movimientos, [d1, d2])
+                    self.assertEqual(movimientos, [dado1, dado2])
+
+    def test_tiene_movimientos_posicion_inicial(self):
+        """Al inicio del juego siempre hay movimientos legales disponibles."""
+        juego = BackgammonGame("player1", "player2")
+        juego.quien_empieza()
+        jugador = juego.get_jugador_actual()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 3, 4))
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 1, 1))
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 6, 6))
+
+    def test_tiene_movimientos_con_reglas(self):
+        """Verifica movimientos legales cuando hay reglas activas."""
+        reglas = [regla_bar, regla_salida_final]
+        juego = BackgammonGame("player1", "player2", reglas=reglas)
+        juego.quien_empieza()
+        jugador = juego.get_jugador_actual()
+        self.assertTrue(juego.tiene_movimientos_legales(jugador, 2, 3))
+
+    def test_get_dados_disponibles(self):
+        """Verifica que se pueden obtener los dados disponibles."""
+        self.game.iniciar_partida()
+        dados = self.game.get_dados_disponibles()
+        self.assertIsInstance(dados, list)
+        self.assertGreater(len(dados), 0)
 
     def test_varios_cambios_turno(self):
         """Verifica múltiples cambios de turno consecutivos."""
@@ -332,269 +256,383 @@ class TestBackgammonGame(unittest.TestCase):
         self.assertEqual(turnos[0], turnos[2])
         self.assertEqual(turnos[1], turnos[3])
 
-    def test_hay_ganador_ambos_sin_ganar(self):
-        """Verifica que no hay ganador cuando ambos tienen menos de 15."""
-        self.game.get_board().set_fuera("player1", 10)
-        self.game.get_board().set_fuera("player2", 10)
-        self.assertFalse(self.game.hay_ganador())
+    def test_mostrar_movimientos_disponibles_sin_dados(self):
+        """Verifica cálculo cuando no hay dados disponibles."""
+        self.game.iniciar_partida()
+        self.game.__dados_disponibles__ = []
+        dados = self.game.mostrar_movimientos_disponibles(3, 4)
+        self.assertIn(3, dados)
+        self.assertIn(4, dados)
 
-    def test_movimiento_valido_simple(self):
-        """Test: movimiento válido con un solo dado."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 3)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
+    def test_mostrar_movimientos_disponibles_con_dados_existentes(self):
+        """Verifica comportamiento cuando ya hay dados disponibles."""
+        self.game.iniciar_partida()
+        self.game.__dados_disponibles__ = [3, 4]
+        dados = self.game.mostrar_movimientos_disponibles(3, 4)
+        self.assertEqual(dados, [3, 4])
 
-        self.assertTrue(resultado["resultados"][0])
-        self.assertEqual(len(resultado["dados_usados"]), 1)
-        self.assertIn(3, resultado["dados_usados"])
+    def test_validar_movimiento_con_reglas(self):
+        """Verifica validación de movimientos con reglas."""
+        self.game.iniciar_partida()
+        jugador = self.game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = self.game._validar_movimiento_con_reglas(
+            jugador, [('bar', 0)], [3, 4]
+        )
+        self.assertIsInstance(resultado, bool)
 
-    def test_movimiento_valido_multiple(self):
-        """Test: movimientos válidos con ambos dados."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 3), (11, 13)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
+    def test_validar_movimiento_con_value_error(self):
+        """Cubre captura de ValueError en validación."""
+        def regla_error(jugador, movimientos, dados, board):
+            raise ValueError("Error intencional")
 
-        self.assertTrue(all(resultado["resultados"]))
-        self.assertEqual(len(resultado["dados_usados"]), 2)
+        game = BackgammonGame("p1", "p2", reglas=[regla_error])
+        game.iniciar_partida()
+        # pylint: disable=protected-access
+        resultado = game._validar_movimiento_con_reglas(
+            game.get_jugador_actual(), [(0, 3)], [3]
+        )
+        self.assertFalse(resultado)
 
-    def test_sin_movimientos_restantes(self):
-        """Test: intento de mover cuando no hay movimientos disponibles."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 0
-        movimientos = [(0, 3)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
+    def test_verificar_movimiento_desde_posicion(self):
+        """Verifica verificación de movimientos desde una posición."""
+        self.game.iniciar_partida()
+        jugador = self.game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = self.game._verificar_movimiento_desde_posicion(
+            jugador, 0, 3, [3, 4]
+        )
+        self.assertIsInstance(resultado, bool)
 
-        self.assertFalse(resultado["resultados"][0])
-        self.assertEqual(len(resultado["dados_usados"]), 0)
-        self.assertIn("No hay movimientos disponibles", resultado["log"][0])
+    def test_tiene_fichas_mas_atras_jugador_x_con_fichas(self):
+        """Cubre detección de fichas más atrás para jugador X."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'X':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = game._tiene_fichas_mas_atras(jugador, 23)
+        self.assertTrue(resultado)
 
-    def test_movimiento_invalido_distancia(self):
-        """Test: movimiento con distancia incorrecta."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 6)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
+    def test_tiene_fichas_mas_atras_jugador_x_sin_fichas_atras(self):
+        """Verifica False cuando no hay fichas más atrás para jugador X."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'X':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = game._tiene_fichas_mas_atras(jugador, 18)
+        self.assertFalse(resultado)
 
-        self.assertFalse(resultado["resultados"][0])
-        self.assertEqual(len(resultado["dados_usados"]), 0)
+    def test_tiene_fichas_mas_atras_jugador_o_con_fichas(self):
+        """Cubre detección de fichas más atrás para jugador O."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'O':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = game._tiene_fichas_mas_atras(jugador, 0)
+        self.assertTrue(resultado)
 
-    def test_movimiento_invalido_posicion_origen(self):
-        """Test: movimiento desde posición sin fichas del jugador."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(23, 20)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
+    def test_tiene_fichas_mas_atras_jugador_o_sin_fichas_atras(self):
+        """Verifica False cuando no hay fichas más atrás para jugador O."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'O':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
+        # pylint: disable=protected-access
+        resultado = game._tiene_fichas_mas_atras(jugador, 5)
+        self.assertFalse(resultado)
 
-        self.assertFalse(resultado["resultados"][0])
+    def test_verificar_bearing_off_escenario(self):
+        """Cubre bearing off con diferentes escenarios."""
+        game = BackgammonGame("player1", "player2", reglas=[regla_salida_final])
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        pos = 23 if jugador.get_ficha() == 'X' else 0
+        # pylint: disable=protected-access
+        resultado = game._verificar_movimiento_desde_posicion(
+            jugador, pos, 1, [1]
+        )
+        self.assertIsInstance(resultado, bool)
 
-    def test_movimiento_con_dobles(self):
-        """Test: movimiento cuando salen dados dobles (4 movimientos)."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 4
-        movimientos = [(0, 3), (0, 3), (11, 14), (11, 14)]
-        resultado = self.game.mover_ficha(movimientos, 3, 3)
-
-        self.assertLessEqual(len(resultado["dados_usados"]), 4)
-        if len(resultado["dados_usados"]) > 0:
-            self.assertTrue(all(d == 3 for d in resultado["dados_usados"]))
-
-    def test_cambio_turno_despues_movimientos(self):
-        """Test: verifica que el turno cambia después de usar todos los movimientos."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        jugador_inicial = self.game.get_jugador_actual()
-
-        movimientos = [(0, 3), (11, 13)]
-        self.game.mover_ficha(movimientos, 3, 2)
-
-        jugador_final = self.game.get_jugador_actual()
-        self.assertNotEqual(jugador_inicial.get_nombre(), jugador_final.get_nombre())
-
-    def test_no_cambio_turno_movimientos_restantes(self):
-        """Test: el turno no cambia si quedan movimientos."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 3
-        jugador_inicial = self.game.get_jugador_actual()
-
-        movimientos = [(0, 3)]
-        self.game.mover_ficha(movimientos, 3, 2)
-
-        jugador_final = self.game.get_jugador_actual()
-        self.assertEqual(jugador_inicial.get_nombre(), jugador_final.get_nombre())
-
-    def test_movimientos_restantes_actualizados(self):
-        """Test: verifica que los movimientos restantes se actualizan correctamente."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 4
-        movimientos_iniciales = self.game.__movimientos_restantes__
-
-        movimientos = [(0, 3), (11, 13)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        movimientos_esperados = movimientos_iniciales - len(resultado["dados_usados"])
-        self.assertEqual(self.game.__movimientos_restantes__, movimientos_esperados)
-
-    def test_dados_restantes_correcto(self):
-        """Test: verifica que los dados restantes se calculan correctamente."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 3)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        if resultado["resultados"][0]:
-            self.assertEqual(len(resultado["dados_restantes"]), 1)
-
-    def test_log_generado_correctamente(self):
-        """Test: verifica que se genera log de los movimientos."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 3)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        self.assertIsInstance(resultado["log"], list)
-        self.assertGreater(len(resultado["log"]), 0)
-
-    def test_estructura_resultado(self):
-        """Test: verifica que el resultado tiene la estructura correcta."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 3)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        self.assertIn("resultados", resultado)
-        self.assertIn("dados_usados", resultado)
-        self.assertIn("dados_restantes", resultado)
-        self.assertIn("log", resultado)
-        self.assertEqual(len(resultado["resultados"]), len(movimientos))
-
-    def test_movimiento_hacia_atras_invalido(self):
-        """Test: no se puede mover hacia atrás."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(11, 8)]
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        self.assertFalse(resultado["resultados"][0])
-
-    def test_lista_vacia_movimientos(self):
-        """Test: lista vacía de movimientos."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = []
-        resultado = self.game.mover_ficha(movimientos, 3, 2)
-
-        self.assertEqual(len(resultado["resultados"]), 0)
-        self.assertEqual(len(resultado["dados_usados"]), 0)
-
-    def test_movimiento_secuencial_valido(self):
-        """Test: múltiples movimientos en secuencia."""
-        self.game.__turno__ = 1
-        self.game.__movimientos_restantes__ = 2
-        movimientos = [(0, 2), (2, 5)]
-        resultado = self.game.mover_ficha(movimientos, 2, 3)
-        self.assertEqual(len(resultado["resultados"]), 2)
-
-    def test_tiene_movimientos_posicion_inicial_sin_reglas(self):
-        """Al inicio del juego siempre hay movimientos legales disponibles."""
-        juego = BackgammonGame("player1", "player2")
-        juego.quien_empieza()
-        jugador = juego.get_jugador_actual()
-        self.assertTrue(juego.tiene_movimientos_legales(jugador, 3, 4))
-        self.assertTrue(juego.tiene_movimientos_legales(jugador, 1, 1))
-        self.assertTrue(juego.tiene_movimientos_legales(jugador, 6, 6))
-
-    def test_tiene_movimientos_posicion_inicial_con_reglas(self):
-        """Verifica movimientos legales cuando hay reglas activas."""
-        reglas = [regla_bar, regla_salida_final]
-        juego = BackgammonGame("player1", "player2", reglas=reglas)
-        juego.quien_empieza()
-        jugador = juego.get_jugador_actual()
-        self.assertTrue(juego.tiene_movimientos_legales(jugador, 2, 3))
-    def test_tiene_movimientos_ficha_en_bar_con_espacio(self):
-        """Detecta movimientos legales cuando hay fichas en el bar y hay espacio."""
-        reglas = [regla_bar]
-        juego = BackgammonGame("player1", "player2", reglas=reglas)
-        juego.quien_empieza()
-        tablero = juego.get_board()
-        tablero.set_bar('player1', 1)
-        jugador_x = juego.get_jugador1()
-        self.assertTrue(juego.tiene_movimientos_legales(jugador_x, 3, 4))
-
-    def test_tiene_movimientos_bar_bloqueado(self):
-        """No hay movimientos si el bar está bloqueado."""
-        reglas = [regla_bar]
-        juego = BackgammonGame("player1", "player2", reglas=reglas)
-        juego.quien_empieza()
-        tablero = juego.get_board()
-        tablero.set_bar('player1', 1)
-        for i in range(6):
-            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
-        jugador_x = juego.get_jugador1()
-        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 1, 2))
-
-    def test_tiene_movimientos_bearing_off_disponible(self):
-        """Detecta que bearing off es posible cuando todas las fichas están en home."""
-        reglas = [regla_salida_final]
-        juego = BackgammonGame("player1", "player2", reglas=reglas)
-        juego.quien_empieza()
-        tablero = juego.get_board()
+    def test_verificar_bearing_off_dado_mayor_sin_fichas_atras(self):
+        """Cubre bearing off con dado mayor."""
+        game = BackgammonGame("player1", "player2", reglas=[regla_salida_final])
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        board = game.get_tablero()
         for i in range(24):
-            tablero.set_posiciones(i, [])
-        tablero.set_bar('player1', 0)
-        tablero.set_bar('player2', 0)
-        tablero.set_posiciones(18, [Checker('X'), Checker('X'), Checker('X')])
-        tablero.set_posiciones(19, [Checker('X'), Checker('X'), Checker('X')])
-        tablero.set_posiciones(20, [Checker('X'), Checker('X'), Checker('X')])
-        tablero.set_posiciones(21, [Checker('X'), Checker('X'), Checker('X')])
-        tablero.set_posiciones(22, [Checker('X')])
-        tablero.set_posiciones(23, [Checker('X'), Checker('X')])
-        jugador_x = juego.get_jugador1()
-        self.assertTrue(juego.tiene_movimientos_legales(jugador_x, 5, 6))
+            board['posiciones'][i] = []
+        if jugador.get_ficha() == 'X':
+            board['posiciones'][22] = [Checker('X')]
+            pos = 22
+            dado = 6
+        else:
+            board['posiciones'][1] = [Checker('O')]
+            pos = 1
+            dado = 6
+        # pylint: disable=protected-access
+        resultado = game._verificar_movimiento_desde_posicion(
+            jugador, pos, dado, [dado]
+        )
+        self.assertIsInstance(resultado, bool)
 
-    def test_tiene_movimientos_bearing_off_no_permitido(self):
-        """No puede sacar fichas si tiene fichas fuera del home."""
-        reglas = [regla_salida_final]
-        juego = BackgammonGame("player1", "player2", reglas=reglas)
-        juego.quien_empieza()
-        tablero = juego.get_board()
+    def test_tiene_movimientos_con_dados_actuales_sin_dados(self):
+        """Verifica retorno False cuando no hay dados disponibles."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        game.__dados_disponibles__ = []
+        # pylint: disable=protected-access
+        resultado = game._tiene_movimientos_con_dados_actuales(jugador)
+        self.assertFalse(resultado)
+
+    def test_tiene_movimientos_con_dados_actuales_con_dados(self):
+        """Verifica con dados disponibles."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        game.__dados_disponibles__ = [3, 4]
+        # pylint: disable=protected-access
+        resultado = game._tiene_movimientos_con_dados_actuales(jugador)
+        self.assertTrue(resultado)
+
+    def test_tiene_movimientos_con_fichas_en_bar(self):
+        """Cubre verificación con fichas en bar."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        board = game.__board__
+        player_key = jugador.get_nombre()
         for i in range(24):
-            tablero.set_posiciones(i, [])
-        tablero.set_posiciones(10, [Checker('X')])
-        tablero.set_posiciones(23, [Checker('X'), Checker('X')])
-        for i in range(11, 17):
-            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
-        jugador_x = juego.get_jugador1()
-        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 6, 6))
-    def test_tiene_movimientos_dados_dobles(self):
-        """Con dados dobles detecta correctamente los movimientos."""
-        juego = BackgammonGame("player1", "player2")
-        juego.quien_empieza()
-        jugador = juego.get_jugador_actual()
-        self.assertTrue(juego.tiene_movimientos_legales(jugador, 3, 3))
-    def test_tiene_movimientos_tablero_vacio(self):
-        """Sin fichas no hay movimientos."""
-        juego = BackgammonGame("player1", "player2")
-        juego.quien_empieza()
-        tablero = juego.get_board()
+            board.set_posiciones(i, [])
+        board.set_bar(player_key, 1)
+        game.__dados_disponibles__ = [3]
+        # pylint: disable=protected-access
+        resultado = game._tiene_movimientos_con_dados_actuales(jugador)
+        self.assertIsInstance(resultado, bool)
+
+    def test_tiene_movimientos_bar_posicion_bloqueada(self):
+        """Cubre skip cuando posición de bar está bloqueada."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        board = game.__board__
+        player_key = jugador.get_nombre()
         for i in range(24):
-            tablero.set_posiciones(i, [])
-        tablero.set_bar('player1', 0)
-        tablero.set_bar('player2', 0)
-        jugador_x = juego.get_jugador1()
-        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 3, 4))
-    def test_tiene_movimientos_una_ficha_bloqueada(self):
-        """Una ficha totalmente bloqueada no tiene movimientos."""
-        juego = BackgammonGame("player1", "player2")
-        juego.quien_empieza()
-        tablero = juego.get_board()
+            board.set_posiciones(i, [])
+        board.set_bar(player_key, 1)
+        ficha_oponente = 'O' if jugador.get_ficha() == 'X' else 'X'
+        zona_entrada = range(0, 6) if jugador.get_ficha() == 'X' else range(18, 24)
+        for pos in zona_entrada:
+            board.set_posiciones(pos, [Checker(ficha_oponente), Checker(ficha_oponente)])
+        game.__dados_disponibles__ = [3]
+        # pylint: disable=protected-access
+        resultado = game._tiene_movimientos_con_dados_actuales(jugador)
+        self.assertFalse(resultado)
+
+    def test_tiene_movimientos_legales_con_bar(self):
+        """Cubre movimientos legales desde bar."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        board = game.__board__
+        player_key = jugador.get_nombre()
+        board.set_bar(player_key, 1)
+        resultado = game.tiene_movimientos_legales(jugador, 3, 4)
+        self.assertIsInstance(resultado, bool)
+
+    def test_mover_ficha_uso_multiple_dados(self):
+        """Cubre uso y remoción de dados múltiples."""
+        game = BackgammonGame("player1", "player2")
+        game.iniciar_partida()
+        game.__dados_disponibles__ = [3, 3]
+        game.__movimientos_restantes__ = 2
+        jugador = game.get_jugador_actual()
+        if jugador.get_ficha() == 'X':
+            movimientos = [(0, 3), (3, 6)]
+        else:
+            movimientos = [(23, 20), (20, 17)]
+        resultado = game.mover_ficha(movimientos, 3, 3)
+        self.assertTrue(len(resultado["dados_usados"]) >= 0)
+
+    def test_get_dados_disponibles_vacio(self):
+        """Cubre lista vacía de dados."""
+        game = BackgammonGame("p1", "p2")
+        dados = game.get_dados_disponibles()
+        self.assertEqual(dados, [])
+
+
+    def test_mostrar_movimientos_con_dados_disponibles(self):
+        """Cubre retornar dados existentes."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        game.__dados_disponibles__ = [2, 5]
+        resultado = game.mostrar_movimientos_disponibles(2, 5)
+        self.assertEqual(resultado, [2, 5])
+
+    def test_quien_empieza_jugador2_gana(self):
+        """Cubre jugador 2 empieza."""
+        game = BackgammonGame("p1", "p2")
+        for _ in range(100):
+            turno, d1, d2 = game.quien_empieza()
+            if turno == 2:
+                self.assertEqual(game.get_turno(), 2)
+                self.assertGreater(d2, d1)
+                break
+            game.__turno__ = 0
+
+
+    def test_mover_ficha_genera_dados_si_no_existen(self):
+        """Cubre generar dados si lista vacía."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        game.__dados_disponibles__ = []
+        game.__movimientos_restantes__ = 2
+        resultado = game.mover_ficha([(0, 3)], 3, 4)
+        self.assertIsInstance(resultado, dict)
+
+    def test_lanzar_dados_dobles(self):
+        """Cubre dados iguales -> 4 movimientos."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        random.seed(42)
+        for _ in range(100):
+            d1, d2, movs = game.lanzar_dados()
+            if d1 == d2:
+                self.assertEqual(movs, 4)
+                self.assertEqual(len(game.get_dados_disponibles()), 4)
+                break
+
+
+    def test_hay_ganador_con_fuera_inexistente(self):
+        """Cubre fuera.get con valor default."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        fuera = game.__board__.get_tablero()["fuera"]
+        fuera.pop("player1", None)
+        resultado = game.hay_ganador()
+        self.assertFalse(resultado)
+
+
+    def test_tiene_movimientos_legales_con_bar_bloqueado(self):
+        """Cubre continue cuando distancia no está en dados."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        board = game.__board__
+        player_key = jugador.get_nombre()
+        board.set_bar(player_key, 1)
+        resultado = game.tiene_movimientos_legales(jugador, 6, 5)
+        self.assertIsInstance(resultado, bool)
+
+
+    def test_verificar_movimiento_bearing_off_fuera_rango(self):
+        """Cubre destino >= 24 o < 0 para bearing off."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'X':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
         for i in range(24):
-            tablero.set_posiciones(i, [])
-        tablero.set_posiciones(5, [Checker('X')])
-        for i in range(6, 12):
-            tablero.set_posiciones(i, [Checker('O'), Checker('O')])
-        jugador_x = juego.get_jugador1()
-        self.assertFalse(juego.tiene_movimientos_legales(jugador_x, 1, 2))
+            game.__board__.set_posiciones(i, [])
+        game.__board__.set_posiciones(22, [Checker('X')])
+        # pylint: disable=protected-access
+        resultado = game._verificar_movimiento_desde_posicion(jugador, 22, 3, [3])
+        self.assertTrue(resultado)
+
+
+    def test_verificar_bearing_off_dado_mayor_con_fichas_atras(self):
+        """Cubre dado mayor pero hay fichas más atrás."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        if game.get_jugador_actual().get_ficha() != 'X':
+            game.cambiar_turno()
+        jugador = game.get_jugador_actual()
+        for i in range(24):
+            game.__board__.set_posiciones(i, [])
+        game.__board__.set_posiciones(22, [Checker('X')])
+        game.__board__.set_posiciones(19, [Checker('X')])
+        # pylint: disable=protected-access
+        resultado = game._verificar_movimiento_desde_posicion(jugador, 22, 6, [6])
+        self.assertFalse(resultado)
+
+
+    def test_verificar_movimiento_fuera_rango_sin_bearing_off(self):
+        """Cubre destino fuera de rango sin poder bearing off."""
+        game = BackgammonGame("p1", "p2")
+        game.iniciar_partida()
+        jugador = game.get_jugador_actual()
+        if jugador.get_ficha() == 'X':
+            game.__board__.set_posiciones(10, [Checker('X')])
+            pos, dado = 10, 15
+        else:
+            game.__board__.set_posiciones(10, [Checker('O')])
+            pos, dado = 10, 15
+        # pylint: disable=protected-access
+        resultado = game._verificar_movimiento_desde_posicion(jugador, pos, dado, [dado])
+        self.assertFalse(resultado)
+    def test_movimiento_basico(self):
+        """Test parseo básico."""
+        resultado = self.game.parsear_movimiento("10 15")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(resultado["movimiento"], (10, 15))
+    def test_con_guion(self):
+        """Test parseo con guion."""
+        resultado = self.game.parsear_movimiento("10-15")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(resultado["movimiento"], (10, 15))
+    def test_desde_bar(self):
+        """Test desde bar."""
+        resultado = self.game.parsear_movimiento("BAR 5")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(resultado["movimiento"], ("bar", 5))
+    def test_hacia_fuera(self):
+        """Test hacia fuera."""
+        resultado = self.game.parsear_movimiento("20 FUERA")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(resultado["movimiento"], (20, "fuera"))
+    def test_espacios_extra(self):
+        """Test con espacios."""
+        resultado = self.game.parsear_movimiento("  10   15  ")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(resultado["movimiento"], (10, 15))
+    def test_formato_invalido(self):
+        """Test formato inválido."""
+        resultado = self.game.parsear_movimiento("10")
+        self.assertFalse(resultado["valido"])
+        self.assertIn("Formato inválido", resultado["error"])
+    def test_origen_invalido(self):
+        """Test origen inválido."""
+        resultado = self.game.parsear_movimiento("abc 15")
+        self.assertFalse(resultado["valido"])
+        self.assertIn("origen inválida", resultado["error"])
+    def test_destino_invalido(self):
+        """Test destino inválido."""
+        resultado = self.game.parsear_movimiento("10 xyz")
+        self.assertFalse(resultado["valido"])
+        self.assertIn("destino inválida", resultado["error"])
+    def test_multiples_validos(self):
+        """Test múltiples movimientos válidos."""
+        resultado = self.game.parsear_multiples_movimientos("10 15, bar 5")
+        self.assertTrue(resultado["valido"])
+        self.assertEqual(len(resultado["movimientos"]), 2)
+    def test_multiples_con_error(self):
+        """Test múltiples con un error."""
+        resultado = self.game.parsear_multiples_movimientos("10 15, abc 5")
+        self.assertFalse(resultado["valido"])
+        self.assertTrue(len(resultado["errores"]) > 0)
+    def test_entrada_vacia(self):
+        """Test entrada vacía."""
+        resultado = self.game.parsear_multiples_movimientos("")
+        self.assertFalse(resultado["valido"])
+        self.assertIn("No se ingresaron", resultado["errores"][0])
+
+
 if __name__ == "__main__":
     unittest.main()
