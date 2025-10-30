@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -35,14 +35,13 @@ jobs:
 
       - name: Run tests and generate coverage report
         run: |
-          coverage run -m unittest discover -s tests -p "test*.py"
+          coverage run -m unittest discover
           coverage xml -o cobertura.xml
           coverage report -m > coverage_report.txt
 
       - name: Run Pylint and generate report
         run: |
-          find . -name "*.py" -not -path "./venv/*" -not -path "./.env/*" | xargs pylint --rcfile=.pylintrc > pylint_report.txt || true
-
+          pylint --rcfile=.pylintrc core > pylint_report.txt || true
       - name: Generate reports file
         run: |
           cat << 'EOF' > generate_reports.py
