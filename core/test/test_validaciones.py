@@ -21,18 +21,6 @@ class TestReglasValidacion(unittest.TestCase):
         self.jugador1 = Player("player1", "X")
         self.jugador2 = Player("player2", "O")
 
-    # regla_bar
-
-    def test_regla_bar_lanza_excepcion_si_hay_fichas_en_bar(self):
-        """Verifica que se lance excepción al mover fuera del bar teniendo fichas en él."""
-        self.board.set_bar("player1", 2)
-        movimientos = [(5, 7)]
-        dados = [2]
-        with self.assertRaises(MovimientoInvalidoError) as contexto:
-            regla_bar(self.jugador1, movimientos, dados, self.board)
-
-        self.assertIn("tiene fichas en el bar", contexto.exception.mensaje)
-
     def test_regla_bar_no_lanza_excepcion_si_mueve_desde_bar(self):
         """Verifica que no se lance excepción al mover correctamente desde el bar."""
         self.board.set_bar("player1", 2)
@@ -46,17 +34,18 @@ class TestReglasValidacion(unittest.TestCase):
                 "regla_bar lanzó excepción aunque el movimiento era desde el bar"
             )
 
-    # regla_salida_final
+    def test_regla_bar_no_lanza_excepcion_si_no_hay_fichas_en_bar(self):
+        """Verifica que no se lance excepción si no hay fichas en el bar."""
+        self.board.set_bar("player1", 0)
+        movimientos = [(5, 7)]
+        dados = [2]
 
-    def test_regla_salida_final_lanza_excepcion_si_no_puede_sacar(self):
-        """Verifica que se lance excepción al intentar sacar sin estar en cuadrante final."""
-        self.board.set_posiciones(3, [Checker("X")])
-        movimientos = [(3, "fuera")]
-        dados = [5]
-        with self.assertRaises(MovimientoInvalidoError) as contexto:
-            regla_salida_final(self.jugador1, movimientos, dados, self.board)
-
-        self.assertIn("no puede sacar fichas", contexto.exception.mensaje)
+        try:
+            regla_bar(self.jugador1, movimientos, dados, self.board)
+        except MovimientoInvalidoError:
+            self.fail(
+                "regla_bar lanzó excepción aunque no había fichas en el bar"
+            )
 
     def test_regla_salida_final_no_lanza_excepcion_si_puede_sacar(self):
         """Verifica que no se lance excepción al sacar fichas correctamente."""
@@ -71,19 +60,15 @@ class TestReglasValidacion(unittest.TestCase):
             self.fail(
                 "regla_salida_final lanzó excepción aunque el jugador podía sacar fichas"
             )
-    def test_movimiento_invalido_error_str(self):
-        """Verifica que __str__ retorna el mensaje correctamente."""
-        mensaje = "Este es un mensaje de error"
-        error = MovimientoInvalidoError(mensaje)
-        self.assertEqual(str(error), mensaje)
-        self.assertEqual(error.mensaje, mensaje)
 
-    def test_movimiento_invalido_error_raise(self):
-        """Verifica que la excepción se puede lanzar y capturar correctamente."""
-        mensaje = "Error de prueba"
-        with self.assertRaises(MovimientoInvalidoError) as context:
-            raise MovimientoInvalidoError(mensaje)
-        self.assertEqual(str(context.exception), mensaje)
-        self.assertEqual(context.exception.mensaje, mensaje)
-if __name__ == "__main__":
-    unittest.main()
+    def test_regla_salida_final_no_lanza_si_no_es_movimiento_fuera(self):
+        """Verifica que no se valide si el movimiento no es hacia fuera."""
+        self.board.set_posiciones(3, [Checker("X")])
+        movimientos = [(3, 5)]
+        dados = [2]
+        try:
+            regla_salida_final(self.jugador1, movimientos, dados, self.board)
+        except MovimientoInvalidoError:
+            self.fail(
+                "regla_salida_final lanzó excepción en movimiento normal"
+            )

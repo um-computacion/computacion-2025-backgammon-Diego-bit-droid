@@ -182,7 +182,7 @@ class Board:
 
         Args:
             movimiento_data: dict con claves 'desde', 'hasta', 'jugador',
-                        'dados_disponibles', 'dados_usados', 'log'
+                            'dados_disponibles', 'dados_usados', 'log'
 
         Returns:
             bool: True si el movimiento fue exitoso, False si no
@@ -193,8 +193,23 @@ class Board:
         dados_disponibles = movimiento_data['dados_disponibles']
         dados_usados = movimiento_data['dados_usados']
         log = movimiento_data['log']
-        distancia = self.calcular_distancia(desde, hasta, jugador)
-
+        if hasta == "bar":
+            log.append(
+                "Movimiento inválido: no se puede mover una ficha al bar. "
+                "El bar es solo para fichas capturadas por el oponente."
+            )
+            return False
+        if desde == "fuera":
+            log.append(
+                "Movimiento inválido: no se puede mover una ficha que ya está fuera del tablero. "
+                "Las fichas fuera del tablero han terminado su recorrido."
+            )
+            return False
+        try:
+            distancia = self.calcular_distancia(desde, hasta, jugador)
+        except ValueError as error:
+            log.append(str(error))
+            return False
         player_key = self._get_player_key(jugador)
         if desde != "bar" and self.__bar__[player_key] > 0:
             log.append(
@@ -344,9 +359,21 @@ class Board:
         """
         Calcula la distancia entre dos posiciones según el sentido del jugador.
 
+        Args:
+            desde: posición origen (int, "bar")
+            hasta: posición destino (int, "fuera")
+            jugador: objeto Player
+
         Returns:
             int: distancia positiva.
+            
+        Raises:
+            ValueError: si el movimiento es inválido (bar→bar, fuera→fuera, fuera→posición)
         """
+        if hasta == "bar":
+            raise ValueError("No se puede mover una ficha al bar.")
+        if desde == "fuera":
+            raise ValueError("No se puede mover una ficha que ya está fuera del tablero.")
         if desde == "bar":
             desde = -1 if jugador.get_ficha() == "X" else 24
 

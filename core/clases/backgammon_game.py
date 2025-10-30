@@ -1,11 +1,10 @@
-"""Backgammon game logic modulo """
+"""Backgammon game logic module."""
 from core.clases.board import Board
 from core.clases.dice import Dice
 from core.clases.player import Player
 from core.clases.validaciones import MovimientoInvalidoError
 from core.clases.excepciones import (
     JuegoNoInicializadoError,
-    TurnoJugadorInvalidoError,
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
 )
@@ -69,27 +68,11 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             dado1: valor del primer dado.
             dado2: valor del segundo dado.
         """
+        dados_disponibles = self.get_dados_disponibles()
+        if dados_disponibles:
+            return dados_disponibles
         movimientos = self.calcular_movimientos_totales(dado1, dado2)
         return movimientos
-
-    def get_jugador_por_nombre(self, nombre):
-        """
-        Devuelve el jugador correspondiente al nombre proporcionado.
-
-        Args:
-            nombre: nombre del jugador.
-
-        Returns:
-            Player: instancia del jugador.
-
-        Raises:
-            TurnoJugadorInvalidoError: si el nombre no coincide con ningún jugador.
-        """
-        if nombre == self.__jugador1__.get_nombre():
-            return self.__jugador1__
-        if nombre == self.__jugador2__.get_nombre():
-            return self.__jugador2__
-        raise TurnoJugadorInvalidoError(nombre)
 
     def quien_empieza(self):
         """Determina aleatoriamente qué jugador comienza la partida."""
@@ -180,14 +163,21 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             for regla in self.__reglas__:
                 regla(jugador, movimientos, dados_disponibles, self.__board__)
         except MovimientoInvalidoError as e:
+            if not self._tiene_movimientos_con_dados_actuales(jugador):
+                self.cambiar_turno()
             return {
                 "resultados": [False] * len(movimientos),
                 "dados_usados": [],
-                "dados_restantes": dados_disponibles,
+                "dados_restantes": self.__dados_disponibles__.copy(),
                 "log": [str(e)]
             }
 
         resultado = self.__board__.mover_ficha(jugador, movimientos, dados_disponibles)
+
+        if not any(resultado["resultados"]):
+            if not self._tiene_movimientos_con_dados_actuales(jugador):
+                self.cambiar_turno()
+            return resultado
 
         for dado_usado in resultado["dados_usados"]:
             if dado_usado in self.__dados_disponibles__:
@@ -197,8 +187,50 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
 
         if self.__movimientos_restantes__ <= 0:
             self.cambiar_turno()
+        elif not self._tiene_movimientos_con_dados_actuales(jugador):
+            self.cambiar_turno()
 
         return resultado
+
+    def _tiene_movimientos_con_dados_actuales(self, jugador):
+        """
+        Verifica si hay movimientos legales con los dados ACTUALMENTE disponibles.
+
+        Args:
+            jugador: instancia del jugador
+
+        Returns:
+            bool: True si hay movimientos legales
+        """
+        dados_disponibles = self.__dados_disponibles__.copy()
+        if not dados_disponibles:
+            return False
+        if jugador.fichas_en_bar(self.__board__) > 0:
+            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'X'
+                          else list(range(18, 24)))
+            for destino in zona_entrada:
+                distancia = self.__board__.calcular_distancia('bar', destino, jugador)
+                if distancia not in dados_disponibles:
+                    continue
+
+                pila_destino = self.__board__.get_posiciones(destino)
+                if pila_destino and pila_destino[-1].get_simbolo() != jugador.get_ficha():
+                    if len(pila_destino) > 1:
+                        continue
+
+                movimiento = [('bar', destino)]
+                if self._validar_movimiento_con_reglas(jugador, movimiento,
+                                                       dados_disponibles.copy()):
+                    return True
+            return False
+        for pos in range(24):
+            posicion = self.__board__.get_posiciones(pos)
+            if posicion and posicion[-1].get_simbolo() == jugador.get_ficha():
+                for dado in set(dados_disponibles):
+                    if self._verificar_movimiento_desde_posicion(jugador, pos, dado,
+                                                                 dados_disponibles.copy()):
+                        return True
+        return False
 
     def hay_ganador(self):
         """
@@ -209,7 +241,8 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         """
         fuera = self.__board__.get_tablero()["fuera"]
         for jugador in [self.__jugador1__, self.__jugador2__]:
-            if fuera['player1' if jugador == self.__jugador1__ else 'player2'] == 15:
+            nombre = jugador.get_nombre()
+            if fuera.get(nombre, 0) == 15:
                 return True
         return False
 
@@ -258,15 +291,6 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         """
         return player.fichas_sacadas(self.__board__)
 
-    def estado_turno(self):
-        """
-        Muestra por consola el estado actual del turno.
-
-        Incluye el nombre del jugador activo y el símbolo de su ficha.
-        """
-        jugador = self.get_jugador_actual()
-        return jugador.estado_jugador(self.__board__)
-
     def get_jugador1(self):
         """Devuelve la instancia del jugador 1."""
         return self.__jugador1__
@@ -274,10 +298,6 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
     def get_jugador2(self):
         """Devuelve la instancia del jugador 2."""
         return self.__jugador2__
-
-    def get_board(self):
-        """Devuelve la instancia del tablero."""
-        return self.__board__
 
     def get_turno(self):
         """
@@ -363,33 +383,29 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             bool: True si hay al menos un movimiento legal, False en caso contrario.
         """
         dados_disponibles = self.calcular_movimientos_totales(dado1, dado2)
-
         if jugador.fichas_en_bar(self.__board__) > 0:
             zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'X'
                           else list(range(18, 24)))
             for destino in zona_entrada:
+                distancia = self.__board__.calcular_distancia('bar', destino, jugador)
+                if distancia not in dados_disponibles:
+                    continue
                 pila_destino = self.__board__.get_posiciones(destino)
                 if pila_destino and pila_destino[-1].get_simbolo() != jugador.get_ficha():
                     if len(pila_destino) > 1:
                         continue
-                distancia = self.__board__.calcular_distancia('bar', destino, jugador)
-                if distancia not in dados_disponibles:
-                    continue
-
                 movimiento = [('bar', destino)]
                 if self._validar_movimiento_con_reglas(jugador, movimiento,
-                                                       dados_disponibles):
+                                                       dados_disponibles.copy()):
                     return True
             return False
-
         for pos in range(24):
             posicion = self.__board__.get_posiciones(pos)
             if posicion and posicion[-1].get_simbolo() == jugador.get_ficha():
                 for dado in set(dados_disponibles):
                     if self._verificar_movimiento_desde_posicion(jugador, pos, dado,
-                                                                 dados_disponibles):
+                                                                 dados_disponibles.copy()):
                         return True
-
         return False
 
     def _validar_movimiento_con_reglas(self, jugador, movimiento, dados_disponibles):
@@ -436,16 +452,126 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             if not posicion_bloqueada:
                 movimiento = [(pos, destino)]
                 es_movimiento_valido = self._validar_movimiento_con_reglas(
-                    jugador, movimiento, dados_disponibles
+                    jugador, movimiento, dados_disponibles.copy()
                 )
         else:
             puede_bearing_off = ((jugador.get_ficha() == 'X' and destino >= 24) or
                                (jugador.get_ficha() == 'O' and destino < 0))
 
             if puede_bearing_off and self.__board__.puede_sacar(jugador):
-                movimiento = [(pos, 'fuera')]
-                es_movimiento_valido = self._validar_movimiento_con_reglas(
-                    jugador, movimiento, dados_disponibles
-                )
-
+                distancia_exacta = 24 - pos if jugador.get_ficha() == 'X' else pos + 1
+                if dado == distancia_exacta:
+                    movimiento = [(pos, 'fuera')]
+                    es_movimiento_valido = self._validar_movimiento_con_reglas(
+                        jugador, movimiento, dados_disponibles.copy())
+                elif dado > distancia_exacta:
+                    tiene_fichas_mas_atras = self._tiene_fichas_mas_atras(jugador, pos)
+                    if not tiene_fichas_mas_atras:
+                        movimiento = [(pos, 'fuera')]
+                        es_movimiento_valido = self._validar_movimiento_con_reglas(
+                            jugador, movimiento, dados_disponibles.copy()
+                        )
         return es_movimiento_valido
+    def _tiene_fichas_mas_atras(self, jugador, posicion):
+        """
+        Verifica si el jugador tiene fichas en posiciones más alejadas del objetivo.
+        Args:
+            jugador: instancia del jugador
+            posicion: posición desde donde se quiere sacar         
+        Returns:
+            bool: True si hay fichas más atrás
+        """
+        if jugador.get_ficha() == 'X':
+            for pos in range(18, posicion):
+                pila = self.__board__.get_posiciones(pos)
+                if pila and pila[-1].get_simbolo() == 'X':
+                    return True
+        else:
+            for pos in range(posicion + 1, 6):
+                pila = self.__board__.get_posiciones(pos)
+                if pila and pila[-1].get_simbolo() == 'O':
+                    return True
+        return False
+    def parsear_movimiento(self, texto):
+        """
+        Convierte una entrada de texto en un movimiento válido.
+        
+        Args:
+            texto: string con el movimiento
+            
+        Returns:
+            dict con:
+                - "valido": bool
+                - "movimiento": tuple (desde, hasta) si es válido
+                - "error": str con mensaje de error si no es válido
+        """
+        texto = texto.strip().lower()
+        if '-' in texto:
+            partes = texto.split('-')
+        else:
+            partes = texto.split()
+        if len(partes) != 2:
+            return {
+                "valido": False,
+                "error": "Formato inválido. Use: 'desde hasta' o 'desde-hasta'"
+            }
+        desde_str, hasta_str = partes[0].strip(), partes[1].strip()
+        if desde_str == "bar":
+            desde = "bar"
+        else:
+            try:
+                desde = int(desde_str)
+            except ValueError:
+                return {
+                    "valido": False,
+                    "error": f"Posición de origen inválida: {desde_str}"
+                }
+        if hasta_str == "fuera":
+            hasta = "fuera"
+        else:
+            try:
+                hasta = int(hasta_str)
+            except ValueError:
+                return {
+                    "valido": False,
+                    "error": f"Posición de destino inválida: {hasta_str}"
+                }
+        return {
+            "valido": True,
+            "movimiento": (desde, hasta)
+        }
+    def parsear_multiples_movimientos(self, entrada):
+        """
+        Parsea múltiples movimientos separados por comas.
+        
+        Args:
+            entrada: string con uno o más movimientos
+    
+        Returns:
+            dict con:
+                - "valido": bool
+                - "movimientos": lista de tuplas si es válido
+                - "errores": lista de strings con errores
+        """
+        if not entrada or not entrada.strip():
+            return {
+                "valido": False,
+                "errores": ["No se ingresaron movimientos"]
+            }
+        movimientos = []
+        errores = []
+        for mov_str in entrada.split(','):
+            resultado = self.parsear_movimiento(mov_str)
+            if resultado["valido"]:
+                movimientos.append(resultado["movimiento"])
+            else:
+                errores.append(f"'{mov_str.strip()}': {resultado['error']}")
+        if errores:
+            return {
+                "valido": False,
+                "errores": errores
+            }
+        return {
+            "valido": True,
+            "movimientos": movimientos
+        }
