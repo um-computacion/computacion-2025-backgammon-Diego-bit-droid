@@ -55,8 +55,8 @@ python -m ui.Pygame_UI
 
 backgammon/
 ├── core/
-│   ├── clases/              # Lógica del juego
-│   └── test/                # Tests unitarios
+│   └──clases/              # Lógica del juego
+├── test/                # Tests unitarios
 ├── cli/
 │   └── main.py              # Interfaz CLI
 ├── pygame_ui/

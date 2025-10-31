@@ -2,8 +2,8 @@
 Módulo que maneja el tablero de Backgammon.
 Incluye la lógica para mover fichas, validar movimientos y gestionar el estado del juego.
 """
-from core.clases.checker import Checker
-from core.clases.excepciones import (
+from core.checker import Checker
+from core.excepciones import (
     MovimientoInvalidoError,
     PuntoInvalidoError,
     MovimientoMalFormadoError,

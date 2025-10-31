@@ -3,14 +3,14 @@ Pruebas unitarias para la clase BackgammonGame.
 """
 import unittest
 import random
-from core.clases.backgammon_game import BackgammonGame
-from core.clases.excepciones import (
+from core.backgammon_game import BackgammonGame
+from core.excepciones import (
     JuegoNoInicializadoError,
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
 )
-from core.clases.checker import Checker
-from core.clases.validaciones import regla_salida_final, regla_bar
+from core.checker import Checker
+from core.validaciones import regla_salida_final, regla_bar
 
 
 # pylint: disable=too-many-public-methods

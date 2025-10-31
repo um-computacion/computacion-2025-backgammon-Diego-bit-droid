@@ -2,10 +2,10 @@
 Módulo de pruebas unitarias para las validaciones del juego.
 """
 import unittest
-from core.clases.player import Player
-from core.clases.board import Board
-from core.clases.checker import Checker
-from core.clases.validaciones import (
+from core.player import Player
+from core.board import Board
+from core.checker import Checker
+from core.validaciones import (
     regla_bar,
     regla_salida_final,
     MovimientoInvalidoError

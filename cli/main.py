@@ -3,7 +3,7 @@ CLI interactivo para jugar Backgammon.
 Se comunica únicamente con la clase BackgammonGame.
 NO maneja excepciones ni lógica de negocio.
 """
-from core.clases.backgammon_game import BackgammonGame
+from core.backgammon_game import BackgammonGame
 
 
 class BackgammonCLI:

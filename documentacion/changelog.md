@@ -110,4 +110,4 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 -Nueva implementacion de dados usados en backgammon
 -Implementacion de nuevo metodos de verifcacion de movientos legales y de opciones en la partida 
 -Implementacion de nuevo metodo en backgammon para evitar el uso de logica en cli
-
+-cambio en la disposicion de archivos

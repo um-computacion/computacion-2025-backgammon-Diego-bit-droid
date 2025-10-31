@@ -2,7 +2,7 @@
 Módulo de pruebas unitarias para la clase Dice.
 """
 import unittest
-from core.clases.dice import Dice
+from core.dice import Dice
 
 
 class TestDice(unittest.TestCase):

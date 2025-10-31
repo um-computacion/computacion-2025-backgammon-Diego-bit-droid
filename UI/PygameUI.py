@@ -3,7 +3,7 @@ Backgammon con Pygame - Versión Simple
 Solo interfaz visual, toda la lógica está en BackgammonGame
 """
 import pygame
-from core.clases.backgammon_game import BackgammonGame
+from core.backgammon_game import BackgammonGame
 
 pygame.init()
 

@@ -1,9 +1,9 @@
 """Backgammon game logic module."""
-from core.clases.board import Board
-from core.clases.dice import Dice
-from core.clases.player import Player
-from core.clases.validaciones import MovimientoInvalidoError
-from core.clases.excepciones import (
+from core.board import Board
+from core.dice import Dice
+from core.player import Player
+from core.validaciones import MovimientoInvalidoError
+from core.excepciones import (
     JuegoNoInicializadoError,
     JuegoYaFinalizadoError,
     ValorDadoInvalidoError
