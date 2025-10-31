@@ -1,3 +1,4 @@
+"""Test unitarios para la clase Excepciones"""
 import unittest
 from core.excepciones import (
     ErrorBackgammon,

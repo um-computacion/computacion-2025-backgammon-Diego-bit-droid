@@ -125,11 +125,17 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         return self.get_jugador_actual()
 
     def lanzar_dados(self):
-        """Lanza los dados y actualiza movimientos disponibles."""
+        """
+        Lanza los dados y actualiza movimientos disponibles.
+        Cambia turno automáticamente si no hay movimientos legales.
+        """
         dado1, dado2 = self.__dice__.lanzar_dados()
         self.__valores_dados__ = (dado1, dado2)
         self.__movimientos_restantes__ = 4 if dado1 == dado2 else 2
         self.__dados_disponibles__ = self.calcular_movimientos_totales(dado1, dado2)
+        jugador_actual = self.get_jugador_actual()
+        if not self.tiene_movimientos_legales(jugador_actual, dado1, dado2):
+            self.cambiar_turno()
         return dado1, dado2, self.__movimientos_restantes__
 
     def mover_ficha(self, movimientos, dado1, dado2):

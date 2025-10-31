@@ -2,13 +2,13 @@
 CLI interactivo para jugar Backgammon.
 Se comunica únicamente con la clase BackgammonGame.
 NO maneja excepciones ni lógica de negocio.
+Refactorizado: NO decide cuándo cambiar de turno (eso lo hace BackgammonGame).
 """
 from core.backgammon_game import BackgammonGame
 
 
 class BackgammonCLI:
     """Interfaz de línea de comandos para Backgammon."""
-    # pylint: disable=too-many-branches,too-many-statements
 
     def __init__(self):
         """Inicializa el CLI sin crear el juego todavía."""
@@ -122,27 +122,22 @@ class BackgammonCLI:
             print("Complete sus movimientos")
             return
 
-        jugador = self.juego.get_jugador_actual()
+        jugador_antes = self.juego.get_jugador_actual()
         dado1, dado2, _ = self.juego.lanzar_dados()
         self.dados_actuales = (dado1, dado2)
         self.dados_lanzados = True
 
-        print(f"\n{jugador.get_nombre()} lanzó los dados: {dado1} y {dado2}")
+        print(f"\n{jugador_antes.get_nombre()} lanzó los dados: {dado1} y {dado2}")
         self.juego.mostrar_movimientos_disponibles(dado1, dado2)
 
-        tiene_movimientos = self.juego.tiene_movimientos_legales(
-            jugador, dado1, dado2
-        )
-
-        if not tiene_movimientos:
+        jugador_despues = self.juego.get_jugador_actual()
+        if jugador_despues.get_nombre() != jugador_antes.get_nombre():
             print("\n⚠ ADVERTENCIA: No hay movimientos legales disponibles.")
-            print("El turno será automáticamente pasado.")
-            jugador_anterior = jugador
-            jugador_nuevo = self.juego.cambiar_turno()
+            print("El turno fue automáticamente pasado.")
             self.dados_actuales = None
             self.dados_lanzados = False
-            print(f"\nTurno pasado de {jugador_anterior.get_nombre()} "
-                  f"a {jugador_nuevo.get_nombre()}")
+            print(f"\nTurno pasado de {jugador_antes.get_nombre()} "
+                  f"a {jugador_despues.get_nombre()}")
 
     def verificar_movimientos_legales(self):
         """Verifica si el jugador actual tiene movimientos legales disponibles."""
@@ -152,6 +147,7 @@ class BackgammonCLI:
         if not self.dados_actuales:
             print("Debe lanzar los dados primero.")
             return
+        
         jugador = self.juego.get_jugador_actual()
         dados_disponibles = self.juego.get_dados_disponibles()
         
@@ -162,7 +158,12 @@ class BackgammonCLI:
         print(f"Dados disponibles: {dados_disponibles}")
         print("-"*60)
         
-        tiene_movimientos = self.juego._tiene_movimientos_con_dados_actuales(jugador)
+        tiene_movimientos = self.juego.tiene_movimientos_legales(
+            jugador, 
+            self.dados_actuales[0], 
+            self.dados_actuales[1]
+        )
+        
         if tiene_movimientos:
             print("✓ HAY movimientos legales disponibles.")
             print("  Puede realizar al menos un movimiento válido.")
@@ -171,26 +172,6 @@ class BackgammonCLI:
             print("  Todas las posiciones están bloqueadas o no hay jugadas válidas.")
 
         print("="*60)
-
-    def parsear_movimiento(self, texto):
-        """
-        Delega el parseo al juego y devuelve el resultado.
-        Ya no lanza excepciones, solo devuelve None e imprime errores.
-        
-        Returns:
-            tuple: (desde, hasta) o None si hay error
-        """
-        if not self.juego:
-            print("Error: No hay juego activo")
-            return None
-        
-        resultado = self.juego.parsear_movimiento(texto)
-        
-        if not resultado["valido"]:
-            print(f"Error: {resultado['error']}")
-            return None
-        
-        return resultado["movimiento"]
 
     def _mostrar_info_turno(self, jugador):
         """Muestra información del turno actual."""
@@ -212,10 +193,7 @@ class BackgammonCLI:
         print("  - Múltiples movimientos: separe con comas '10 15, 15 20'")
 
     def _procesar_entrada_movimientos(self, entrada):
-        """
-        Procesa la entrada del usuario y devuelve lista de movimientos.
-        Ya no lanza excepciones, solo devuelve None e imprime errores.
-        """
+        """Procesa la entrada del usuario y devuelve lista de movimientos."""
         if not self.juego:
             print("Error: No hay juego activo")
             return None
@@ -228,8 +206,8 @@ class BackgammonCLI:
             return None
         
         return resultado["movimientos"]
+
     def mover_fichas(self):
-        # pylint: disable=too-many-branches,too-many-statements
         """Solicita y ejecuta movimientos de fichas."""
         if not self.juego or not self.dados_actuales or not self.dados_lanzados:
             print("Debe lanzar los dados primero." if self.juego else "No hay partida en curso.")
@@ -247,11 +225,10 @@ class BackgammonCLI:
             jugador_inicial, self.dados_actuales[0], self.dados_actuales[1]
         ):
             print("\n⚠ No hay movimientos legales disponibles.")
-            print("Pasando automáticamente el turno...")
-            jugador_nuevo = self.juego.cambiar_turno()
+            jugador_nuevo = self.juego.get_jugador_actual()
             self.dados_actuales = None
             self.dados_lanzados = False
-            print(f"\nTurno pasado a {jugador_nuevo.get_nombre()}")
+            print(f"\nEl turno ya fue pasado a {jugador_nuevo.get_nombre()}")
             return
 
         while True:
@@ -275,21 +252,6 @@ class BackgammonCLI:
                 break
 
             dados_disponibles = self.juego.get_dados_disponibles()
-            
-            if dados_disponibles:
-                tiene_movimientos = self.juego._tiene_movimientos_con_dados_actuales(jugador_inicial)
-                if not tiene_movimientos:
-                    print("\n" + "="*60)
-                    print("SIN MOVIMIENTOS LEGALES")
-                    print("="*60)
-                    print(f"No hay movimientos legales con los dados: {dados_disponibles}")
-                    print("Cambiando turno automáticamente...")
-                    self.juego.cambiar_turno()
-                    print("\nTodos los movimientos completados.")
-                    print("Cambiando de jugador...")
-                    self.dados_actuales = None
-                    self.dados_lanzados = False
-                    break
             
             print(f"\nMovimientos restantes: {self.juego.get_movimientos_restantes()}")
             print(f"Dados disponibles: {dados_disponibles}")
@@ -329,18 +291,6 @@ class BackgammonCLI:
                     self.dados_lanzados = False
                     break
 
-                if not self.juego._tiene_movimientos_con_dados_actuales(jugador_inicial):
-                    print("\n" + "="*60)
-                    print("SIN MOVIMIENTOS LEGALES RESTANTES")
-                    print("="*60)
-                    print("No hay más movimientos válidos con los dados disponibles.")
-                    print("Cambiando turno automáticamente...")
-                    self.juego.cambiar_turno()
-                    print("\nTodos los movimientos completados.")
-                    print("Cambiando de jugador...")
-                    self.dados_actuales = None
-                    self.dados_lanzados = False
-                    break
                 print("\n⚠ Movimiento inválido. Intente otro movimiento.")
                 print("\n" + "="*60)
                 print("TABLERO ACTUAL")
@@ -362,7 +312,6 @@ class BackgammonCLI:
                 self.dados_lanzados = False
                 return
 
-            # Verificar si cambió el turno automáticamente
             jugador_despues = self.juego.get_jugador_actual()
             if jugador_despues.get_nombre() != jugador_inicial.get_nombre():
                 print("\n" + "="*60)
@@ -384,24 +333,8 @@ class BackgammonCLI:
             
             dados_disponibles = self.juego.get_dados_disponibles()
             print(f"\nDados disponibles: {dados_disponibles}")
-            
-            if dados_disponibles:
-                tiene_movimientos = self.juego._tiene_movimientos_con_dados_actuales(jugador_inicial)
-                if not tiene_movimientos:
-                    print("\n" + "="*60)
-                    print("SIN MOVIMIENTOS LEGALES RESTANTES")
-                    print("="*60)
-                    print(f"No hay movimientos legales con los dados: {dados_disponibles}")
-                    print("Cambiando turno automáticamente...")
-                    self.juego.cambiar_turno()
-                    print("\nTodos los movimientos completados.")
-                    print("Cambiando de jugador...")
-                    self.dados_actuales = None
-                    self.dados_lanzados = False
-                    break
 
     def ejecutar(self):
-        # pylint: disable=too-many-branches
         """Ejecuta el bucle principal del CLI."""
         print("\nBienvenido a BACKGAMMON!")
 
