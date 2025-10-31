@@ -497,16 +497,16 @@ class BackgammonPygame:
         # Zona superior (Jugador X - Blancas)
         pygame.draw.rect(self.screen, LIGHT_BEIGE,
                         (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5))
-        pygame.draw.rect(self.screen, BLACK,
+        pygame.draw.rect(self.screen, WHITE,
                         (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
         
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
-                               self.board_y + 30, self.font_tiny, BLACK)
+                               self.board_y + 30, self.font_tiny, WHITE)
         
-        if 'jugador1' in estado:
-            fichas_out = estado['jugador1']['fichas_sacadas']
+        if 'jugador2' in estado:
+            fichas_out = estado['jugador2']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
-                                   self.board_y + 60, self.font_medium, BLACK)
+                                   self.board_y + 60, self.font_medium, WHITE)
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + 90 + (i * 35)
                 self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'X')
@@ -520,12 +520,12 @@ class BackgammonPygame:
                          bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
         
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
-                               self.board_y + BOARD_HEIGHT - 30, self.font_tiny, WHITE)
+                               self.board_y + BOARD_HEIGHT - 30, self.font_tiny, BLACK)
         
-        if 'jugador2' in estado:
-            fichas_out = estado['jugador2']['fichas_sacadas']
+        if 'jugador1' in estado:
+            fichas_out = estado['jugador1']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
-                                   self.board_y + BOARD_HEIGHT - 60, self.font_medium, WHITE)
+                                   self.board_y + BOARD_HEIGHT - 60, self.font_medium, BLACK)
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + BOARD_HEIGHT - 90 - (i * 35)
                 self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'O')
