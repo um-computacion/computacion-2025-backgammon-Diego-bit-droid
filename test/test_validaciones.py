@@ -72,3 +72,37 @@ class TestReglasValidacion(unittest.TestCase):
             self.fail(
                 "regla_salida_final lanzó excepción en movimiento normal"
             )
+    def test_movimiento_invalido_error_str(self):
+        """Cubre constructor y __str__ de MovimientoInvalidoError."""
+        err = MovimientoInvalidoError("Mensaje de prueba")
+        self.assertEqual(str(err), "Mensaje de prueba")
+
+    def test_regla_bar_lanza_error_si_hay_fichas_en_bar(self):
+        """Debe lanzar error si hay fichas en el bar y no se mueven primero."""
+        jugador = Player("A", "X")
+        board = Board()
+        board.__bar__["A"] = 1
+        with self.assertRaises(MovimientoInvalidoError):
+            regla_bar(jugador, [(1, 3)], [3], board)
+
+    def test_regla_bar_no_lanza_error_si_mueve_desde_bar(self):
+        """No debe lanzar error si el jugador mueve desde el bar."""
+        jugador = Player("A", "X")
+        board = Board()
+        board.__bar__["A"] = 1
+        regla_bar(jugador, [("bar", 3)], [3], board)
+
+    def test_regla_salida_final_lanza_error(self):
+        """Debe lanzar error si intenta sacar fichas sin tener todas en el cuadrante final."""
+        jugador = Player("A", "X")
+        board = Board()
+        board.puede_sacar = lambda j: False
+        with self.assertRaises(MovimientoInvalidoError):
+            regla_salida_final(jugador, [(20, "fuera")], [6], board)
+
+    def test_regla_salida_final_valido(self):
+        """Movimiento válido cuando puede sacar fichas."""
+        jugador = Player("A", "X")
+        board = Board()
+        board.puede_sacar = lambda j: True
+        regla_salida_final(jugador, [(20, "fuera")], [6], board)

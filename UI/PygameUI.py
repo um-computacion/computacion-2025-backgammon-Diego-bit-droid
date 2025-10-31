@@ -490,26 +490,29 @@ class BackgammonPygame:
         bear_off_x = self.board_x + BOARD_WIDTH + 10
         bear_off_width = 100
         
-        # Zona superior (Jugador O - Negras)
-        pygame.draw.rect(self.screen, DARK_BEIGE,
+        estado = self.game.get_estado_juego()
+        if not estado:
+            return
+        
+        # Zona superior (Jugador X - Blancas)
+        pygame.draw.rect(self.screen, LIGHT_BEIGE,
                         (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5))
         pygame.draw.rect(self.screen, BLACK,
                         (bear_off_x, self.board_y, bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
         
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
-                               self.board_y + 30, self.font_tiny, WHITE)
+                               self.board_y + 30, self.font_tiny, BLACK)
         
-        estado = self.game.get_estado_juego()
-        if estado and 'jugador2' in estado:
-            fichas_out = estado['jugador2']['fichas_sacadas']
+        if 'jugador1' in estado:
+            fichas_out = estado['jugador1']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
                                    self.board_y + 60, self.font_medium, BLACK)
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + 90 + (i * 35)
-                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'O')
+                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'X')
         
-        # Zona inferior (Jugador X - Blancas)
-        pygame.draw.rect(self.screen, LIGHT_BEIGE,
+        # Zona inferior (Jugador O - Negras)
+        pygame.draw.rect(self.screen, DARK_BEIGE,
                         (bear_off_x, self.board_y + BOARD_HEIGHT // 2 + 5, 
                          bear_off_width, BOARD_HEIGHT // 2 - 5))
         pygame.draw.rect(self.screen, BLACK,
@@ -517,16 +520,15 @@ class BackgammonPygame:
                          bear_off_width, BOARD_HEIGHT // 2 - 5), 3)
         
         self.draw_text_centered("BEAR OFF", bear_off_x + bear_off_width // 2,
-                               self.board_y + BOARD_HEIGHT - 30, self.font_tiny, BLACK)
+                               self.board_y + BOARD_HEIGHT - 30, self.font_tiny, WHITE)
         
-        if estado and 'jugador1' in estado:
-            fichas_out = estado['jugador1']['fichas_sacadas']
+        if 'jugador2' in estado:
+            fichas_out = estado['jugador2']['fichas_sacadas']
             self.draw_text_centered(str(fichas_out), bear_off_x + bear_off_width // 2,
                                    self.board_y + BOARD_HEIGHT - 60, self.font_medium, WHITE)
             for i in range(min(fichas_out, 5)):
                 cy = self.board_y + BOARD_HEIGHT - 90 - (i * 35)
-                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'X')
-    
+                self.draw_checker(bear_off_x + bear_off_width // 2, cy, 'O')
     def draw_game_info(self):
         """Panel lateral de información - USA BackgammonGame.get_estado_juego()"""
         if not self.game:

@@ -175,7 +175,7 @@ class Board:
             "dados_restantes": dados_disponibles,
             "log": log
         }
-
+    # pylint: disable=too-many-statements
     def _procesar_movimiento_individual(self, movimiento_data):
         """
         Procesa un movimiento individual validándolo y ejecutándolo.
@@ -205,11 +205,7 @@ class Board:
                 "Las fichas fuera del tablero han terminado su recorrido."
             )
             return False
-        try:
-            distancia = self.calcular_distancia(desde, hasta, jugador)
-        except ValueError as error:
-            log.append(str(error))
-            return False
+
         player_key = self._get_player_key(jugador)
         if desde != "bar" and self.__bar__[player_key] > 0:
             log.append(
@@ -217,38 +213,6 @@ class Board:
                 f"ficha(s) del bar antes de mover otras fichas."
             )
             return False
-
-        if distancia not in dados_disponibles:
-            if jugador.get_ficha() == "X":
-                if distancia < 0:
-                    log.append(
-                        f"Movimiento inválido: intentas moverte "
-                        f"{abs(distancia)} posiciones hacia atrás, "
-                        f"pero como jugador X debes moverte hacia adelante "
-                        f"(de 0 a 23). "
-                        f"Dados disponibles: {dados_disponibles}"
-                    )
-                else:
-                    log.append(
-                        f"No hay dado con valor {distancia} disponible. "
-                        f"Dados disponibles: {dados_disponibles}"
-                    )
-            else:
-                if distancia < 0:
-                    log.append(
-                        f"Movimiento inválido: intentas moverte "
-                        f"{abs(distancia)} posiciones hacia adelante, "
-                        f"pero como jugador O debes moverte hacia atrás "
-                        f"(de 23 a 0). "
-                        f"Dados disponibles: {dados_disponibles}"
-                    )
-                else:
-                    log.append(
-                        f"No hay dado con valor {distancia} disponible. "
-                        f"Dados disponibles: {dados_disponibles}"
-                    )
-            return False
-
         try:
             if not self.validar_movimiento(desde, hasta, jugador):
                 log.append(
@@ -258,7 +222,58 @@ class Board:
         except (MovimientoInvalidoError, PuntoInvalidoError) as error:
             log.append(str(error))
             return False
-
+        try:
+            distancia = self.calcular_distancia(desde, hasta, jugador)
+        except ValueError as error:
+            log.append(str(error))
+            return False
+        es_bearing_off =hasta == "fuera"
+        dado_valido = None
+        if es_bearing_off:
+            for dado in dados_disponibles:
+                if dado >= distancia:
+                    dado_valido = dado
+                    break
+            if dado_valido is None:
+                log.append(
+                    f"No hay dado disponible para sacar desde {desde}. "
+                    f"Distancia necesaria: {distancia}, "
+                    f"Dados disponibles: {dados_disponibles}"
+                )
+                return False
+        else:
+            if distancia in dados_disponibles:
+                dado_valido = distancia
+            else:
+                if jugador.get_ficha() == "X":
+                    if distancia < 0:
+                        log.append(
+                            f"Movimiento inválido: intentas moverte "
+                            f"{abs(distancia)} posiciones hacia atrás, "
+                            f"pero como jugador X debes moverte hacia adelante "
+                            f"(de 0 a 23). "
+                            f"Dados disponibles: {dados_disponibles}"
+                        )
+                    else:
+                        log.append(
+                            f"No hay dado con valor {distancia} disponible. "
+                            f"Dados disponibles: {dados_disponibles}"
+                        )
+                else:
+                    if distancia < 0:
+                        log.append(
+                            f"Movimiento inválido: intentas moverte "
+                            f"{abs(distancia)} posiciones hacia adelante, "
+                            f"pero como jugador O debes moverte hacia atrás "
+                            f"(de 23 a 0). "
+                            f"Dados disponibles: {dados_disponibles}"
+                        )
+                    else:
+                        log.append(
+                            f"No hay dado con valor {distancia} disponible. "
+                            f"Dados disponibles: {dados_disponibles}"
+                        )
+                return False
         if isinstance(hasta, int):
             pila_destino = self.__posiciones__[hasta]
             if pila_destino and \
@@ -270,7 +285,6 @@ class Board:
                         f"Solo puedes comer una ficha enemiga solitaria."
                     )
                     return False
-
         if hasta == "fuera":
             if not self.puede_sacar(jugador):
                 log.append(
@@ -287,12 +301,11 @@ class Board:
                     f"({'18-23' if jugador.get_ficha() == 'X' else '0-5'})."
                 )
                 return False
-
         return self._ejecutar_movimiento({
             'desde': desde,
             'hasta': hasta,
             'jugador': jugador,
-            'distancia': distancia,
+            'distancia': dado_valido,
             'dados_disponibles': dados_disponibles,
             'dados_usados': dados_usados,
             'log': log

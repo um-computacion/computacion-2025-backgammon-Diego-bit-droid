@@ -905,7 +905,7 @@ coverage html
 
 ### 7.3. Liskov Substitution Principle (LSP)
 
-**Cumplimiento**: ✅ **ALTO**
+**Cumplimiento**: ✅ 
 
 **Evidencia**:
 - Las excepciones son sustituibles: cualquier código que capture `ErrorBackgammon` funcionará correctamente con cualquier excepción derivada.
@@ -917,7 +917,7 @@ coverage html
 
 ### 7.4. Interface Segregation Principle (ISP)
 
-**Cumplimiento**: ✅ **ALTO**
+**Cumplimiento**: ✅
 
 **Evidencia**:
 - Cada clase tiene una interfaz mínima y cohesiva.
@@ -931,7 +931,7 @@ coverage html
 
 ### 7.5. Dependency Inversion Principle (DIP)
 
-**Cumplimiento**: ✅ **MEDIO-ALTO**
+**Cumplimiento**: ✅ 
 
 **Evidencia de cumplimiento**:
 1. **Inyección de reglas**: `BackgammonGame` depende de abstracciones (funciones) en lugar de reglas concretas.
@@ -953,8 +953,6 @@ coverage html
 
 **El código de alto nivel no depende de detalles de bajo nivel.**
 
----
-
 ## 8. Conclusiones
 
 El diseño del juego de Backgammon demuestra:
@@ -965,16 +963,6 @@ El diseño del juego de Backgammon demuestra:
 4. **Robustez**: Sistema completo de excepciones garantiza manejo de errores
 5. **Cumplimiento SOLID**: Principios aplicados consistentemente
 
-**Fortalezas**:
-- Separación clara de responsabilidades
-- Jerarquía de excepciones completa y bien diseñada
-- Inyección de reglas permite flexibilidad
-- Encapsulación fuerte de estado interno
-
-**Áreas de mejora futuras**:
-- Mayor uso de inyección de dependencias (DIP)
-- Implementar interfaces explícitas (aunque Python no las requiere)
-- Agregar más documentación de ejemplos de uso
 
 ---
 
