@@ -2,7 +2,7 @@
 Pruebas unitarias para la clase Checker del juego Backgammon.
 """
 import unittest
-from core.clases.checker import Checker
+from core.checker import Checker
 
 
 class TestChecker(unittest.TestCase):

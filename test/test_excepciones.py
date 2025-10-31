@@ -3,7 +3,7 @@ Módulo de pruebas unitarias para las excepciones del juego de Backgammon.
 Verifica la correcta jerarquía y funcionamiento de todas las excepciones personalizadas.
 """
 import unittest
-from core.clases.excepciones import (
+from core.excepciones import (
     ExcepcionSalirDelJuego,
     ErrorBackgammon,
     ErrorJuego,

@@ -2,8 +2,8 @@
 Módulo de pruebas unitarias para la clase Player.
 """
 import unittest
-from core.clases.player import Player
-from core.clases.board import Board
+from core.player import Player
+from core.board import Board
 
 
 class TestPlayer(unittest.TestCase):

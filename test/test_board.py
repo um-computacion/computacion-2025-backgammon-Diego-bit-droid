@@ -3,10 +3,10 @@ Pruebas unitarias para la clase Board del juego Backgammon.
 """
 import unittest
 from unittest.mock import patch
-from core.clases.checker import Checker
-from core.clases.player import Player
-from core.clases.board import Board
-from core.clases.excepciones import (
+from core.checker import Checker
+from core.player import Player
+from core.board import Board
+from core.excepciones import (
     PuntoInvalidoError,
     MovimientoMalFormadoError
 )
