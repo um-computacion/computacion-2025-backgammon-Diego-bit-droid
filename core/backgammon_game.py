@@ -26,8 +26,8 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         self.__dice__ = Dice()
         self.__turno__ = 0
         self.__movimientos_restantes__ = 0
-        self.__jugador1__ = Player(nombre=jugador1, ficha='X')
-        self.__jugador2__ = Player(nombre=jugador2, ficha='O')
+        self.__jugador1__ = Player(nombre=jugador1, ficha='O')
+        self.__jugador2__ = Player(nombre=jugador2, ficha='X')
         self.__reglas__ = reglas if reglas else []
         self.__dados_disponibles__ = []
         self.__valores_dados__ = (0, 0)
@@ -206,7 +206,7 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         if not dados_disponibles:
             return False
         if jugador.fichas_en_bar(self.__board__) > 0:
-            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'X'
+            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'O'
                           else list(range(18, 24)))
             for destino in zona_entrada:
                 distancia = self.__board__.calcular_distancia('bar', destino, jugador)
@@ -240,10 +240,10 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             bool: True si hay ganador, False en caso contrario.
         """
         fuera = self.__board__.get_tablero()["fuera"]
-        for jugador in [self.__jugador1__, self.__jugador2__]:
-            nombre = jugador.get_nombre()
-            if fuera.get(nombre, 0) == 15:
-                return True
+        if fuera.get('player1', 0) == 15:
+            return True
+        if fuera.get('player2', 0) == 15:
+            return True
         return False
 
     def get_tablero(self):
@@ -384,7 +384,7 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         """
         dados_disponibles = self.calcular_movimientos_totales(dado1, dado2)
         if jugador.fichas_en_bar(self.__board__) > 0:
-            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'X'
+            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'O'
                           else list(range(18, 24)))
             for destino in zona_entrada:
                 distancia = self.__board__.calcular_distancia('bar', destino, jugador)
@@ -440,7 +440,7 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         Returns:
             bool: True si hay un movimiento legal
         """
-        destino = pos + dado if jugador.get_ficha() == 'X' else pos - dado
+        destino = pos + dado if jugador.get_ficha() == 'O' else pos - dado
         es_movimiento_valido = False
 
         if 0 <= destino < 24:
@@ -455,23 +455,18 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
                     jugador, movimiento, dados_disponibles.copy()
                 )
         else:
-            puede_bearing_off = ((jugador.get_ficha() == 'X' and destino >= 24) or
-                               (jugador.get_ficha() == 'O' and destino < 0))
+            puede_bearing_off = ((jugador.get_ficha() == 'O' and destino >= 24) or
+                               (jugador.get_ficha() == 'X' and destino < 0))
 
             if puede_bearing_off and self.__board__.puede_sacar(jugador):
-                distancia_exacta = 24 - pos if jugador.get_ficha() == 'X' else pos + 1
-                if dado == distancia_exacta:
+                distancia_exacta = 24 - pos if jugador.get_ficha() == 'O' else pos + 1
+                if dado >= distancia_exacta:
                     movimiento = [(pos, 'fuera')]
                     es_movimiento_valido = self._validar_movimiento_con_reglas(
-                        jugador, movimiento, dados_disponibles.copy())
-                elif dado > distancia_exacta:
-                    tiene_fichas_mas_atras = self._tiene_fichas_mas_atras(jugador, pos)
-                    if not tiene_fichas_mas_atras:
-                        movimiento = [(pos, 'fuera')]
-                        es_movimiento_valido = self._validar_movimiento_con_reglas(
-                            jugador, movimiento, dados_disponibles.copy()
-                        )
+                        jugador, movimiento, dados_disponibles.copy()
+                    )
         return es_movimiento_valido
+
     def _tiene_fichas_mas_atras(self, jugador, posicion):
         """
         Verifica si el jugador tiene fichas en posiciones más alejadas del objetivo.
@@ -481,17 +476,18 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         Returns:
             bool: True si hay fichas más atrás
         """
-        if jugador.get_ficha() == 'X':
+        if jugador.get_ficha() == 'O':
             for pos in range(18, posicion):
                 pila = self.__board__.get_posiciones(pos)
-                if pila and pila[-1].get_simbolo() == 'X':
+                if pila and pila[-1].get_simbolo() == 'O':
                     return True
         else:
             for pos in range(posicion + 1, 6):
                 pila = self.__board__.get_posiciones(pos)
-                if pila and pila[-1].get_simbolo() == 'O':
+                if pila and pila[-1].get_simbolo() == 'X':
                     return True
         return False
+
     def parsear_movimiento(self, texto):
         """
         Convierte una entrada de texto en un movimiento válido.
@@ -540,6 +536,7 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
             "valido": True,
             "movimiento": (desde, hasta)
         }
+
     def parsear_multiples_movimientos(self, entrada):
         """
         Parsea múltiples movimientos separados por comas.

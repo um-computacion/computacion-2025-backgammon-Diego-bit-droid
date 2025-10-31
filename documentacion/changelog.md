@@ -111,3 +111,10 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 -Implementacion de nuevo metodos de verifcacion de movientos legales y de opciones en la partida 
 -Implementacion de nuevo metodo en backgammon para evitar el uso de logica en cli
 -cambio en la disposicion de archivos
+## [1.6.1] - 2025-10-31
+
+### Correciones
+-Correcion en metodo hay gandor identificaba mal al jugador
+
+### Implementacion 
+-Implementacion de test para optima cobertura 

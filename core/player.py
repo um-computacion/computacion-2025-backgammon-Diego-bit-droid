@@ -11,7 +11,6 @@ class Player:
     def get_nombre(self):
         """Devuelve el nombre del jugador."""
         return self.__nombre__
-
     def get_ficha(self):
         """Devuelve el símbolo de la ficha del jugador."""
         return self.__ficha__

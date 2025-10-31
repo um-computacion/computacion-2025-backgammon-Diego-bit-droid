@@ -356,7 +356,7 @@ class BackgammonCLI:
                 print("="*60)
                 self.juego.mostrar_tablero()
                 ganador = jugador_inicial
-                print(f"\n🏆 ¡{ganador.get_nombre()} ha ganado la partida!")
+                print(f"\n¡{ganador.get_nombre()} ha ganado la partida!")
                 self.juego = None
                 self.dados_actuales = None
                 self.dados_lanzados = False

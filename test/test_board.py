@@ -20,6 +20,7 @@ class TestBoard(unittest.TestCase):
         self.board = Board()
         self.jugador1 = Player("player1", "X")
         self.jugador2 = Player("player2", "O")
+
     @patch('builtins.print')
     def test_mostrar_board_imprime_correctamente(self, mock_print):
         """Verifica que mostrar_board imprima información correcta."""
@@ -29,6 +30,7 @@ class TestBoard(unittest.TestCase):
         self.board.set_fuera("player2", 6)
         self.board.mostrar_board()
         self.assertTrue(mock_print.called)
+
     def test_preparar_tablero(self):
         """Verifica que el tablero se inicialice correctamente."""
         tablero = self.board.get_tablero()["posiciones"]
@@ -67,6 +69,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [True])
         self.assertEqual(resultado["dados_usados"], [3])
         self.assertEqual(
@@ -84,6 +87,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [True])
         self.assertEqual(self.board.get_bar("player2"), 1)
         self.assertEqual(
@@ -101,6 +105,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [("bar", 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [True])
         self.assertEqual(self.board.get_bar("player1"), 0)
         self.assertIn("movió de bar a 3", resultado["log"][0])
@@ -114,6 +119,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(
             any("No hay fichas en la posición" in msg or
@@ -130,6 +136,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertIn(
             "La ficha en 0 no pertenece al jugador",
@@ -146,6 +153,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(
             any("No se puede mover a 3" in msg and "bloqueada" in msg
@@ -180,6 +188,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [("bar", 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertIn("No hay fichas en el bar", resultado["log"][0])
 
@@ -192,6 +201,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(10, "fuera")], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(
             any("cuadrante final" in msg.lower() for msg in resultado["log"])
@@ -207,6 +217,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 3)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(
             any("No hay fichas" in msg or "no te pertenecen" in msg
@@ -222,6 +233,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(0, 6)], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertEqual(resultado["dados_usados"], [])
         self.assertTrue(
@@ -241,6 +253,7 @@ class TestBoard(unittest.TestCase):
             self.jugador1, [(22, "fuera")], dados
         )
 
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [True])
         self.assertEqual(self.board.get_fuera("player1"), 1)
         self.assertTrue(
@@ -328,6 +341,7 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(
             self.jugador1, [(0, 5)], dados
         )
+        # pylint: disable=unsubscriptable-object
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
             any("No hay dado con valor" in msg or "Dados disponibles" in msg
@@ -340,6 +354,7 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(
             self.jugador1, [(5, 0)], [5]
         )
+        # pylint: disable=unsubscriptable-object
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
             any("hacia atrás" in msg.lower() for msg in resultado["log"])
@@ -351,6 +366,7 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(
             self.jugador2, [(20, 23)], [3]
         )
+        # pylint: disable=unsubscriptable-object
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
             any("hacia adelante" in msg.lower() for msg in resultado["log"])
@@ -363,6 +379,7 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(
             self.jugador1, [(0, 5)], [5]
         )
+        # pylint: disable=unsubscriptable-object
         self.assertFalse(resultado["resultados"][0])
         self.assertTrue(
             any("No se puede mover a 5" in msg and "bloqueada" in msg
@@ -409,8 +426,11 @@ class TestBoard(unittest.TestCase):
         resultado = self.board.mover_ficha(
             self.jugador1, [(10, 13)], dados
         )
+        # pylint: disable=unsubscriptable-object
         self.assertEqual(resultado["resultados"], [False])
         self.assertTrue(any("Debes primero sacar" in msg and "del bar" in msg
                             for msg in resultado["log"]))
+
+
 if __name__ == "__main__":
     unittest.main()

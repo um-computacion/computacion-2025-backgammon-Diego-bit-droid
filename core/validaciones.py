@@ -9,7 +9,7 @@ class MovimientoInvalidoError(Exception):
     def __str__(self):
         # pylint: disable=no-member
         """Retorna el mensaje de error como string."""
-        return self.mensaje
+        return self.__mensaje__
 
 def regla_bar(jugador, movimientos, _dados, board):
     """
