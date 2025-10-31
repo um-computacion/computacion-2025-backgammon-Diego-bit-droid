@@ -1,38 +1,16 @@
-"""
-Módulo de pruebas unitarias para las excepciones del juego de Backgammon.
-Verifica la correcta jerarquía y funcionamiento de todas las excepciones personalizadas.
-"""
 import unittest
 from core.excepciones import (
-    ExcepcionSalirDelJuego,
     ErrorBackgammon,
     ErrorJuego,
     JuegoNoInicializadoError,
-    TurnoJugadorInvalidoError,
     JuegoYaFinalizadoError,
     MovimientoInvalidoError,
-    SinMovimientosDisponiblesError,
     ErrorTablero,
     PuntoInvalidoError,
-    ComerMultipleFichasError,
-    SacarFueraDesdePosicionInvalidaError,
     MovimientoMalFormadoError,
-    FichasEnBarError,
-    BearingOffNoPermitidoError,
-    PosicionBloqueadaError,
     ErrorDados,
-    DadosNoLanzadosError,
     ValorDadoInvalidoError
 )
-
-
-class TestExcepcionSalirDelJuego(unittest.TestCase):
-    """Pruebas para la excepción ExcepcionSalirDelJuego."""
-
-    def test_excepcion_salir_se_puede_lanzar(self):
-        """Verifica que se pueda lanzar y capturar la excepción."""
-        with self.assertRaises(ExcepcionSalirDelJuego):
-            raise ExcepcionSalirDelJuego("El usuario decidió salir")
 
 
 class TestErrorBackgammon(unittest.TestCase):
@@ -66,11 +44,6 @@ class TestErrorJuego(unittest.TestCase):
         with self.assertRaises(JuegoNoInicializadoError):
             raise JuegoNoInicializadoError("El juego no está inicializado")
 
-    def test_turno_jugador_invalido_error(self):
-        """Verifica que TurnoJugadorInvalidoError funcione correctamente."""
-        with self.assertRaises(TurnoJugadorInvalidoError):
-            raise TurnoJugadorInvalidoError("No es tu turno")
-
     def test_juego_ya_finalizado_error(self):
         """Verifica que JuegoYaFinalizadoError funcione correctamente."""
         with self.assertRaises(JuegoYaFinalizadoError):
@@ -80,11 +53,6 @@ class TestErrorJuego(unittest.TestCase):
         """Verifica que MovimientoInvalidoError funcione correctamente."""
         with self.assertRaises(MovimientoInvalidoError):
             raise MovimientoInvalidoError("Movimiento no permitido")
-
-    def test_sin_movimientos_disponibles_error(self):
-        """Verifica que SinMovimientosDisponiblesError funcione correctamente."""
-        with self.assertRaises(SinMovimientosDisponiblesError):
-            raise SinMovimientosDisponiblesError("No hay movimientos disponibles")
 
 
 class TestErrorTableroBase(unittest.TestCase):
@@ -109,37 +77,10 @@ class TestErrorTablero(unittest.TestCase):
         with self.assertRaises(PuntoInvalidoError):
             raise PuntoInvalidoError("Posición fuera de rango")
 
-    def test_comer_multiple_fichas_error(self):
-        """Verifica que ComerMultipleFichasError funcione correctamente."""
-        with self.assertRaises(ComerMultipleFichasError):
-            raise ComerMultipleFichasError("No se puede comer múltiples fichas")
-
-    def test_sacar_fuera_desde_posicion_invalida_error(self):
-        """Verifica que SacarFueraDesdePosicionInvalidaError funcione correctamente."""
-        with self.assertRaises(SacarFueraDesdePosicionInvalidaError):
-            raise SacarFueraDesdePosicionInvalidaError(
-                "No se puede sacar desde esta posición"
-            )
-
     def test_movimiento_mal_formado_error(self):
         """Verifica que MovimientoMalFormadoError funcione correctamente."""
         with self.assertRaises(MovimientoMalFormadoError):
             raise MovimientoMalFormadoError("Formato de movimiento inválido")
-
-    def test_fichas_en_bar_error(self):
-        """Verifica que FichasEnBarError funcione correctamente."""
-        with self.assertRaises(FichasEnBarError):
-            raise FichasEnBarError("Debe mover fichas del bar primero")
-
-    def test_bearing_off_no_permitido_error(self):
-        """Verifica que BearingOffNoPermitidoError funcione correctamente."""
-        with self.assertRaises(BearingOffNoPermitidoError):
-            raise BearingOffNoPermitidoError("Fichas fuera del cuadrante final")
-
-    def test_posicion_bloqueada_error(self):
-        """Verifica que PosicionBloqueadaError funcione correctamente."""
-        with self.assertRaises(PosicionBloqueadaError):
-            raise PosicionBloqueadaError("Posición bloqueada por el oponente")
 
 
 class TestErrorDadosBase(unittest.TestCase):
@@ -150,24 +91,19 @@ class TestErrorDadosBase(unittest.TestCase):
         with self.assertRaises(ErrorDados):
             raise ErrorDados("Error de dados genérico")
 
-    def test_jerarquia_dados_no_lanzados(self):
-        """Verifica que DadosNoLanzadosError hereda de ErrorDados."""
+    def test_jerarquia_valor_dado_invalido(self):
+        """Verifica que ValorDadoInvalidoError hereda de ErrorDados."""
         with self.assertRaises(ErrorDados):
-            raise DadosNoLanzadosError("Test herencia")
+            raise ValorDadoInvalidoError(7)
 
 
 class TestErrorDados(unittest.TestCase):
     """Pruebas para las excepciones relacionadas con los dados."""
 
-    def test_dados_no_lanzados_error(self):
-        """Verifica que DadosNoLanzadosError funcione correctamente."""
-        with self.assertRaises(DadosNoLanzadosError):
-            raise DadosNoLanzadosError("Los dados no han sido lanzados")
-
     def test_valor_dado_invalido_error(self):
         """Verifica que ValorDadoInvalidoError funcione correctamente."""
         with self.assertRaises(ValorDadoInvalidoError):
-            raise ValorDadoInvalidoError("Valor de dado fuera de rango")
+            raise ValorDadoInvalidoError(7)
 
 
 class TestJerarquiaExcepciones(unittest.TestCase):
@@ -186,7 +122,7 @@ class TestJerarquiaExcepciones(unittest.TestCase):
     def test_todas_excepciones_dados_heredan_error_backgammon(self):
         """Verifica que todas las excepciones de dados heredan de ErrorBackgammon."""
         with self.assertRaises(ErrorBackgammon):
-            raise DadosNoLanzadosError("Test")
+            raise ValorDadoInvalidoError(7)
 
     def test_error_juego_hereda_de_error_backgammon(self):
         """Verifica que ErrorJuego hereda de ErrorBackgammon."""
