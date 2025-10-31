@@ -1,6 +1,5 @@
 """
 Módulo que maneja el tablero de Backgammon.
-Incluye la lógica para mover fichas, validar movimientos y gestionar el estado del juego.
 """
 from core.checker import Checker
 from core.excepciones import (
@@ -133,12 +132,10 @@ class Board:
     def mover_ficha(self, jugador, movimientos, dados_disponibles):
         """
         Mueve fichas según los movimientos dados y valida cada uno.
-
         Args:
             jugador: objeto Player que realiza el movimiento
             movimientos: lista de tuplas (desde, hasta)
             dados_disponibles: lista de valores de dados disponibles
-
         Returns:
             dict: diccionario con resultados, dados usados y log
         """
