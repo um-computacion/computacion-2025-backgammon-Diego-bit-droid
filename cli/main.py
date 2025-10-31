@@ -1,8 +1,5 @@
 """
 CLI interactivo para jugar Backgammon.
-Se comunica únicamente con la clase BackgammonGame.
-NO maneja excepciones ni lógica de negocio.
-Refactorizado: NO decide cuándo cambiar de turno (eso lo hace BackgammonGame).
 """
 from core.backgammon_game import BackgammonGame
 
