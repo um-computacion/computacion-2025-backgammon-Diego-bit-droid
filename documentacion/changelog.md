@@ -115,6 +115,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 
 ### Correciones
 -Correcion en metodo hay gandor identificaba mal al jugador
+-correcion en el bear off del pygame
 
 ### Implementacion 
 -Implementacion de test para optima cobertura 
