@@ -22,8 +22,13 @@ TOTAL                       828     66    92%
 
 ## Pylint Report
 ```text
+************* Module core.backgammon_game
+core/backgammon_game.py:183:19: E1136: Value 'resultado' is unsubscriptable (unsubscriptable-object)
+core/backgammon_game.py:188:26: E1136: Value 'resultado' is unsubscriptable (unsubscriptable-object)
+core/backgammon_game.py:192:46: E1136: Value 'resultado' is unsubscriptable (unsubscriptable-object)
+
 -----------------------------------
-Your code has been rated at 10/10
+Your code has been rated at 9.92/10
 
 
 ```
