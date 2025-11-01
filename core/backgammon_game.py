@@ -212,8 +212,8 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         if not dados_disponibles:
             return False
         if jugador.fichas_en_bar(self.__board__) > 0:
-            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'O'
-                          else list(range(18, 24)))
+            zona_entrada = (list(range(18, 24)) if jugador.get_ficha() == 'O'
+                          else list(range(0, 6)))
             for destino in zona_entrada:
                 distancia = self.__board__.calcular_distancia('bar', destino, jugador)
                 if distancia not in dados_disponibles:
@@ -390,8 +390,8 @@ class BackgammonGame:  # pylint: disable=too-many-public-methods,too-many-instan
         """
         dados_disponibles = self.calcular_movimientos_totales(dado1, dado2)
         if jugador.fichas_en_bar(self.__board__) > 0:
-            zona_entrada = (list(range(0, 6)) if jugador.get_ficha() == 'O'
-                          else list(range(18, 24)))
+            zona_entrada = (list(range(18, 24)) if jugador.get_ficha() == 'O'
+                          else list(range(0, 6)))
             for destino in zona_entrada:
                 distancia = self.__board__.calcular_distancia('bar', destino, jugador)
                 if distancia not in dados_disponibles:
