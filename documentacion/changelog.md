@@ -120,3 +120,9 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 -correcion a la hora de sacar fichas del bar
 ### Implementacion 
 -Implementacion de test para optima cobertura 
+
+## [1.6.2] - 2025-11-1
+
+### Correciones
+-Correcion de bug en el uso de dado
+

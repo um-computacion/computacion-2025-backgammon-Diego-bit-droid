@@ -224,14 +224,13 @@ class Board:
         except ValueError as error:
             log.append(str(error))
             return False
-        es_bearing_off =hasta == "fuera"
+        es_bearing_off = hasta == "fuera"
         dado_valido = None
         if es_bearing_off:
-            for dado in dados_disponibles:
-                if dado >= distancia:
-                    dado_valido = dado
-                    break
-            if dado_valido is None:
+            dados_validos = [dado for dado in dados_disponibles if dado >= distancia]
+            if dados_validos:
+                dado_valido = min(dados_validos)
+            else:
                 log.append(
                     f"No hay dado disponible para sacar desde {desde}. "
                     f"Distancia necesaria: {distancia}, "
@@ -307,7 +306,6 @@ class Board:
             'dados_usados': dados_usados,
             'log': log
         })
-
     def _ejecutar_movimiento(self, movimiento_data):
         """
         Ejecuta el movimiento físico de la ficha.
