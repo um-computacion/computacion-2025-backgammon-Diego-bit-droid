@@ -34,12 +34,11 @@ jobs:
       - name: Run tests and generate coverage report
         run: |
           coverage run -m unittest discover
-          coverage xml -o cobertura.xml
           coverage report -m > coverage_report.txt
 
       - name: Run Pylint and generate report
         run: |
-          pylint --rcfile=.pylintrc ./tests ./core  > pylint_report.txt || true
+          pylint --rcfile=.pylintrc ./test ./core  > pylint_report.txt || true
 
       - name: Generate reports file
         run: |
