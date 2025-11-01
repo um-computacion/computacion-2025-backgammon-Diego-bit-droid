@@ -38,6 +38,7 @@ python -m unittest core.test.test_cli
 ### Análisis de código (pylint)
 
 pylint core 
+
 pylint test
 
 ## Modo Juego
