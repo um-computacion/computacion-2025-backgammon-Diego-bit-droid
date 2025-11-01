@@ -1,23 +1,5 @@
 ************* Module ./tests
 ./tests:1:0: F0001: No module named ./tests (fatal)
-************* Module ./pygame_ui
-./pygame_ui:1:0: F0001: No module named ./pygame_ui (fatal)
-************* Module cli.main
-cli/main.py:147:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:150:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:157:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:159:20: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:160:35: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:163:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:197:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:199:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:204:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:252:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:278:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:330:0: C0303: Trailing whitespace (trailing-whitespace)
-cli/main.py:207:4: R0912: Too many branches (13/12) (too-many-branches)
-cli/main.py:207:4: R0915: Too many statements (95/50) (too-many-statements)
-cli/main.py:334:4: R0912: Too many branches (13/12) (too-many-branches)
 
 -----------------------------------
 Your code has been rated at 0.00/10
