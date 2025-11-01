@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Pylint and generate report
         run: |
-          pylint --rcfile=.pylintrc ./test ./core  > pylint_report.txt || true
+          pylint --rcfile=.pylintrc .test .core  > pylint_report.txt || true
 
       - name: Generate reports file
         run: |
